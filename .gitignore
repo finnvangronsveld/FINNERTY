@@ -1,0 +1,21 @@
+node_modules/
+.next/
+.local/
+.env*
+!.env.example
+*.tsbuildinfo
+test-results/
+playwright-report/
+.pnpm-store/
+.vercel/
+*.log
+*.pem
+*.key
+*.p12
+*.pfx
+*.sql.gz
+*.dump
+# Original project briefing and artwork stay local; optimized site assets are in public/art.
+/Finnerty-project-startpakket.zip
+/FINNERTY-MASTERPROMPT.md
+/references/

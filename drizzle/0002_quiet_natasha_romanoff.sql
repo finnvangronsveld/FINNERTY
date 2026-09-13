@@ -1,0 +1,1 @@
+ALTER TABLE "oauth_flows" ADD COLUMN "encrypted_verifier" text NOT NULL;

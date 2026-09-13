@@ -1,0 +1,8 @@
+import { isDemo } from '@/server/config';
+export async function GET() {
+  if (!isDemo()) return new Response('Niet beschikbaar', { status: 404 });
+  return new Response(
+    `<!doctype html><html lang="nl"><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lokale playerdemo</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#06101e;color:#f2f7ff;font:14px system-ui;display:grid;place-content:center;text-align:center;overflow:hidden}body:before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#030812cc,#03081266),url('/art/frost-orbit-small.webp') center/cover;opacity:.8}main{position:relative}small{color:#8faec7;letter-spacing:.22em}h1{font-size:clamp(24px,5vw,42px);margin:14px 0}p{color:#a5b9cf}span{color:#65cfff;font-variant-numeric:tabular-nums}footer{position:absolute;bottom:16px;left:20px;right:20px;border-top:2px solid #65cfff55;padding-top:9px;display:flex;justify-content:space-between;font-size:11px;color:#9fb4ca}</style></head><body><main><small>FINNERTYVERSE / PLAYER DEMO</small><h1>You're in our orbit.</h1><p>Gesimuleerd beeld · geen echte uitzending</p><span id="elapsed">00:00</span></main><footer><b>LOKALE DEMO · GEEN AUDIO</b><span>VASTE PLAYERINSTANTIE</span></footer><script>const started=Date.now();document.body.dataset.instance=crypto.randomUUID();setInterval(()=>{const s=Math.floor((Date.now()-started)/1000);document.getElementById('elapsed').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},1000);</script></body></html>`,
+    { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } },
+  );
+}

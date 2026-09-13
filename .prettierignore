@@ -1,0 +1,9 @@
+node_modules
+.next
+.local
+references
+FINNERTY-MASTERPROMPT.md
+drizzle/meta
+pnpm-lock.yaml
+test-results
+docs/screenshots
