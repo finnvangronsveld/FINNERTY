@@ -26,3 +26,14 @@ Production smoke: home beschikbaar; account zonder sessie 401; admin en private 
 - Volledige accessibility-audit, definitieve privacy/retentie en uitgevoerde verwijdering.
 
 De tests tonen een controleerbare lokale basis. Ze zijn geen verklaring dat v1 of de externe integraties klaar zijn.
+
+## The Vault — 22 september 2026
+
+| Controle                      | Uitkomst | Reikwijdte                                                                                                    |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| 8 Vault-tests (PGlite)        | Geslaagd | Exacte RTP over alle uitkomsten per spel, ongeldige inzetten, ledger = saldo, tempo, parallel, idempotentie   |
+| Leaderboard/maandvenster      | Geslaagd | Alleen opt-in, verwijderingsverzoeken uitgesloten, gedeelde rang, middernacht Europe/Brussels incl. zomertijd |
+| Browserflow Vault             | Geslaagd | 8 snelle klikken → 1 request; directe API-burst van 5 → max. 1× 200, rest 429; CSRF 403; opt-in ranglijst     |
+| Overflow 360/390/430/768/1440 | Geslaagd | Alle vier spellen, zonder horizontale scroll                                                                  |
+
+Niet bewezen: tempo en walletlock met meerdere echte PostgreSQL-verbindingen (PGlite serialiseert), en animatieprestaties op een fysieke middelmatige telefoon.

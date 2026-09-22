@@ -7,7 +7,8 @@ De masterprompt is volledig gelezen en Frost Orbit visueel geïnspecteerd. De re
 - Fase A: home, Vault, Stream, Community, Account, privacyconcept en permanente applicatieshell.
 - Fase B: OAuth-codeflow via oauth4webapi, DB-sessies, vaste Twitch-identiteit, encryptie, validatie/refresh, gedeelde livecache, EventSub-handler en beveiligde scheduler-ingang. Echte koppelingen nog niet beproefd.
 - Fase C: PostgreSQL/Drizzle-migraties, lokale PGlite-demo, checkpoints/remainders, integer accounting, ledger en auditable correcties. Read-only StreamElements-transport en strikt intern contract. Echte mapping/normalisatie/sync expliciet nog gesloten.
-- Fase D: verzorgde Vault-teaser zonder gamefuncties; accountjournaal met paginering, profielvoorkeur, verwijderingsregistratie; basisbeheer met zoeken en correcties voor geconfigureerde Twitch-admins.
+- Fase D: accountjournaal met paginering, profielvoorkeur, verwijderingsregistratie; basisbeheer met zoeken en correcties voor geconfigureerde Twitch-admins.
+- Fase E (22 september 2026): The Vault als gameroom — Coinflip, Dice, Orbit Slots, roulette, servergestuurd tempo, rondejournaal en opt-in leaderboards totaal/maand. Zie `vault.md`.
 
 ## Controles
 
@@ -31,7 +32,7 @@ PGlite serialiseert databasewerk op één engine. Concurrent aangeroepen domeinf
 
 - `AGENTS.md` is automatisch door Next.js aangemaakt; lees relevante lokale Next-documentatie vóór verdere Next-wijzigingen.
 - Gebruik alleen eigen punten. StreamElements-punten nooit lezen als saldo of aanpassen.
-- Geen spelengine of inzet-/uitbetalingsroute toevoegen zonder nieuwe expliciete opdracht.
+- Vault-uitbreidingen volgen de harde regels in `vault.md`: geen aankoop (ook niet via subs), geen prijzen met geldwaarde, geen overdracht, geen koppeling met gokaanbieders.
 - Demo uitsluitend lokaal; geen productie-fallback of onbeveiligde admin.
 - Bewaak claimniveau: dit is voortgang door bouwfases, geen afgeronde v1.
 - ESLint 9.39.5 is momenteel nodig door peer-ranges van Nexts react/import/a11y-plugins; upstream markeert die linterversie deprecated. Voor release afhankelijkheden opnieuw afstemmen. TypeScript 7 werkte nog niet met typescript-eslint; TypeScript 6.0.3 wel.

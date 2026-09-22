@@ -7,7 +7,7 @@ import {
   CircleHelp,
   Clock3,
   Fingerprint,
-  LockKeyhole,
+  Gamepad2,
   MessageCircle,
   Orbit,
   Play,
@@ -19,6 +19,7 @@ import { OrbitArt } from './orbit-art';
 import { useSite } from './site-provider';
 import { LoginButton, StreamStatus } from './site-shell';
 import { PlayerAnchor } from './stream-player';
+import { Leaderboard } from './vault/leaderboard';
 export function HomePage() {
   const { stream } = useSite();
   return (
@@ -80,14 +81,14 @@ export function HomePage() {
         <article className="feature-card vault-card">
           <div className="card-top">
             <span className="eyebrow">01 / THE VAULT</span>
-            <span className="construction-badge">
-              <LockKeyhole size={11} /> UNDER CONSTRUCTION
+            <span className="construction-badge open">
+              <Gamepad2 size={11} /> NOW OPEN
             </span>
           </div>
           <h2>
-            Something new.
+            The gameroom.
             <br />
-            <span>In our orbit.</span>
+            <span>Play for glory.</span>
           </h2>
           <p>{copy.vault.description}</p>
           <div className="vault-emblem" aria-hidden="true">
@@ -97,7 +98,7 @@ export function HomePage() {
             <span className="emblem-spark" />
           </div>
           <Link href="/vault" className="button outline">
-            Ontdek The Vault <ArrowUpRight size={16} />
+            Open The Vault <ArrowUpRight size={16} />
           </Link>
         </article>
         <article className="feature-card crew-card">
@@ -134,44 +135,6 @@ export function HomePage() {
         </Link>
       </section>
     </div>
-  );
-}
-export function VaultPage() {
-  return (
-    <section className="vault-page">
-      <OrbitArt />
-      <div className="vault-copy">
-        <Link href="/" className="breadcrumb">
-          FINNERTYVERSE <span>/</span> THE VAULT
-        </Link>
-        <span className="construction-badge">
-          <LockKeyhole size={12} /> {copy.vault.status}
-        </span>
-        <p className="eyebrow">SOMETHING IS TAKING SHAPE</p>
-        <h1>
-          THE
-          <br />
-          <span>VAULT.</span>
-        </h1>
-        <p className="vault-description">{copy.vault.description}</p>
-        <div className="hero-actions">
-          <Link href="/stream" className="button primary">
-            <Play size={16} />
-            Kijk de stream
-          </Link>
-          <Link href="/" className="button ghost">
-            Terug naar Finnertyverse <ArrowUpRight size={16} />
-          </Link>
-        </div>
-        <div className="vault-footnote">
-          <LockKeyhole size={14} />
-          <span>Voor nu nog gesloten. Blijf in onze orbit.</span>
-        </div>
-      </div>
-      <span className="vault-side-label" aria-hidden="true">
-        FINNERTY / THE NEXT CHAPTER
-      </span>
-    </section>
   );
 }
 export function StreamPage() {
@@ -297,19 +260,12 @@ export function CommunityPage() {
         <p className="eyebrow">CREW LEADERBOARD</p>
         <h2>Een eigen plek in de universe.</h2>
         <p>
-          Het leaderboard zal totaal verdiende Vault Points tonen van geregistreerde siteaccounts
-          die hun profiel zichtbaar maken.
+          Vault Points uit kijktijd en The Vault. Alleen accounts die zelf kiezen om zichtbaar te
+          zijn staan erin.
         </p>
-        <div className="empty-state">
-          <ShieldCheck size={24} />
-          <p>
-            Er is nog geen gepubliceerd leaderboard.
-            <br />
-            <span>De lokale demo bevat geen echte kijkersranglijst.</span>
-          </p>
-        </div>
-        <Link href="/account" className="text-link">
-          Beheer je profiel <ArrowRight size={15} />
+        <Leaderboard limit={25} />
+        <Link href="/vault" className="text-link">
+          Naar The Vault <ArrowRight size={15} />
         </Link>
       </section>
     </section>

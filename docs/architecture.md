@@ -11,6 +11,7 @@ Next.js 16.3.5 App Router, React 19, TypeScript 6, Drizzle ORM 0.45, PostgreSQL-
 | `src/server/auth`         | OAuth, accountidentiteit, versleuteling, sessies, autorisatie             |
 | `src/server/integrations` | Twitch-adapters, EventSub-verificatie, read-only StreamElements-transport |
 | `src/server/points`       | Getransactioneerde accounting; uitsluitend genormaliseerde waarnemingen   |
+| `src/server/vault`        | Vault-spellen, tempo onder walletlock, rondejournaal en leaderboards      |
 | `src/server/db`           | Schema en server-only databaseverbinding                                  |
 | `src/app/api`             | Gevalideerde HTTP-grenzen en private accountresponses                     |
 | `scripts`                 | Gecontroleerde migratie en host-scheduler-ingang                          |

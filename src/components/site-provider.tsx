@@ -9,6 +9,7 @@ type Context = {
   demoPlayback: DemoPlayback;
   setDemoPlayback: (value: DemoPlayback) => void;
   refreshAccount: () => Promise<void>;
+  setBalance: (balance: string) => void;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   effects: boolean;
@@ -128,6 +129,8 @@ export function SiteProvider({ config, children }: { config: PublicConfig; child
         demoPlayback,
         setDemoPlayback,
         refreshAccount,
+        setBalance: (balance) =>
+          setAccount((current) => (current ? { ...current, balance } : current)),
         login,
         logout,
         effects,

@@ -16,8 +16,7 @@ export const copy = {
   },
   vault: {
     title: 'THE VAULT',
-    status: 'Under construction',
-    description: 'We bouwen aan iets nieuws. Binnenkort meer.',
+    description: 'Coinflip, dice, slots en roulette met je gratis Vault Points. Geen echt geld.',
   },
   community: {
     title: 'Same chaos. Your people.',

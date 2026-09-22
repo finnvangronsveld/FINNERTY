@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import '@fontsource-variable/manrope';
 import '@fontsource-variable/space-grotesk';
 import './globals.css';
+import './vault.css';
 import { SiteProvider } from '@/components/site-provider';
 import { SiteShell } from '@/components/site-shell';
 import { publicConfig } from '@/server/config';

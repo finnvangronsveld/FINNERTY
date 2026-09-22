@@ -1,6 +1,6 @@
 # Product en huidige scope
 
-Finnerty is het merk. Finnertyverse is de wereld. The Crew is de community. The Vault is de definitieve naam van een toekomstige uitbreiding, in deze versie uitsluitend **Under construction**: “We bouwen aan iets nieuws. Binnenkort meer.” Geen datum of beloofde puntenwaarde.
+Finnerty is het merk. Finnertyverse is de wereld. The Crew is de community. The Vault is de gameroom: spellen met gratis Vault Points en leaderboards voor de eer. Zie [The Vault](vault.md).
 
 De actuele gebruikersopdracht en volledige masterprompt zijn gelezen. De tekst in `PROJECT-START-HIER.md` is als projectcontext behandeld, niet als een afzonderlijke opdracht om agents in te zetten of externe acties uit te voeren. Geen externe services gewijzigd of publicatie uitgevoerd.
 
@@ -8,11 +8,11 @@ De actuele gebruikersopdracht en volledige masterprompt zijn gelezen. De tekst i
 
 | Route        | Huidige invulling                                                              |
 | ------------ | ------------------------------------------------------------------------------ |
-| `/`          | Frost Orbit-hero, streamactie, Vault-teaser en community                       |
+| `/`          | Frost Orbit-hero, streamactie, Vault-kaart en community                        |
 | `/stream`    | Uitgebreide playerzone of eerlijke offline/onbekend-state, accountstrook       |
-| `/vault`     | Decoratieve F-bol, Under construction, stream- en homeactie                    |
+| `/vault`     | Gameroom: saldo, vier spellen, leaderboard totaal/maand, rondes, huisregels    |
 | `/account`   | Identiteit, kijktijd, saldo/totaal verdiend, pagineerbaar journaal en voorkeur |
-| `/community` | Geconfigureerde Discord-link; geen verzonnen aantallen of ranglijst            |
+| `/community` | Discord-link en opt-in leaderboard (top 25); geen verzonnen aantallen          |
 | `/privacy`   | Eerlijke conceptbeschrijving en expliciete ontbrekende publicatiegegevens      |
 | `/admin`     | Alleen geverifieerde Twitch-ID’s uit serverconfiguratie; geen demo-admin       |
 
@@ -25,7 +25,7 @@ Voorlopige naam: Vault Points / VP. Serverconfiguratie bepaalt labels. De demo g
 - Resterende seconden worden bewaard. Lagere tellers, ontbrekende records en mappingconflicten geven geen reset of beloning.
 - Koerswijzigingen vragen expliciete checkpointmigratie; tot die tijd pauzeert toekenning.
 - Balans en totaal verdiend staan apart; beheercorrecties veranderen het verdiende totaal niet.
-- Geen aankoop, overdracht, inzet, opname, inwisseling of spelrondes.
+- Geen aankoop, overdracht, opname of inwisseling. Spelrondes in The Vault gebruiken alleen bestaand saldo en boeken het netto resultaat als `game` in het journaal; `total_earned` blijft kijktijd.
 
 ## Ontwerp
 
@@ -35,4 +35,4 @@ Mobiel <432 px of een zeer lage viewport: livebalk met Twitch-link. Dit is de ex
 
 ## Open productkeuzes
 
-Echte kanaalidentiteit, Discord-link, definitieve puntennaam/koers, historische importbeleid, profielpubliekheid, bewaartermijnen, contactgegevens eigenaar. Het leaderboard is nog niet gepubliceerd. De opt-in-voorkeur wordt wel opgeslagen.
+Echte kanaalidentiteit, Discord-link, definitieve puntennaam/koers, historische importbeleid, bewaartermijnen, contactgegevens eigenaar. Het leaderboard toont alleen accounts die zichtbaarheid zelf aanzetten.

@@ -16,6 +16,8 @@ import { AccountIntro } from './pages';
 import { AccountAvatar } from './site-shell';
 import { useSearchParams } from 'next/navigation';
 import type { LedgerView } from '@/lib/contracts';
+import { GAME_INFO, type GameId } from '@/lib/vault';
+import { GameIcon } from './vault/shared';
 export function AccountPage() {
   const searchParams = useSearchParams();
   const { account, config, logout, busy, refreshAccount, setNotice } = useSite();
@@ -158,7 +160,8 @@ export function AccountPage() {
           <p className="points-note">
             <ShieldCheck size={17} />
             Eigen punten in onze database. Historische kijktijd vormt eerst een basislijn. Punten
-            hebben hier geen aankoop- of inwisselfunctie.
+            kun je niet kopen, overdragen of inwisselen; in The Vault speel je er alleen voor de
+            eer.
           </p>
           <div className="account-columns">
             <section className="ledger-panel">
@@ -183,17 +186,23 @@ export function AccountPage() {
                   {entries.map((entry) => (
                     <div className="ledger-row" key={entry.id}>
                       <span className="ledger-icon">
-                        <Clock3 size={17} />
+                        {entry.type === 'game' ? (
+                          <GameIcon game={entry.reason ?? ''} size={17} />
+                        ) : (
+                          <Clock3 size={17} />
+                        )}
                       </span>
                       <div>
                         <strong>
                           {entry.type === 'watchtime'
                             ? 'Geregistreerde kijktijd'
-                            : 'Beheercorrectie'}
+                            : entry.type === 'game'
+                              ? `The Vault · ${GAME_INFO[entry.reason as GameId]?.name ?? 'Spel'}`
+                              : 'Beheercorrectie'}
                         </strong>
                         <span>
                           {new Date(entry.createdAt).toLocaleString('nl-BE')}
-                          {entry.reason && ` · ${entry.reason}`}
+                          {entry.reason && entry.type !== 'game' && ` · ${entry.reason}`}
                         </span>
                       </div>
                       <strong className="ledger-amount">
@@ -237,7 +246,7 @@ export function AccountPage() {
                   disabled={saving}
                   onChange={(event) => void savePreference(event.target.checked)}
                 />
-                <span>Toon mijn profiel in het toekomstige siteleaderboard</span>
+                <span>Toon mij in de leaderboards (totaal en maand)</span>
               </label>
               <p>Alleen geregistreerde siteaccounts. Je kunt je voorkeur altijd wijzigen.</p>
               <Link className="text-link" href="/privacy">

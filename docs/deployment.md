@@ -1,6 +1,6 @@
 # Finnerty online zetten: stap voor stap
 
-Gebruik Vercel voor de Next.js-website en Neon voor je eigen PostgreSQL-database. De eerste deployment kan al zonder credentials. Daarna activeer je achtereenvolgens de database, Twitch-login en onderhoud. The Vault blijft Under construction. Automatische kijktijdpunten vereisen nog implementatie en verificatie van de StreamElements-adapter; alleen instellingen invullen maakt dat deel niet af.
+Gebruik Vercel voor de Next.js-website en Neon voor je eigen PostgreSQL-database. De eerste deployment kan al zonder credentials. Daarna activeer je achtereenvolgens de database, Twitch-login en onderhoud. The Vault (gameroom) werkt pas met saldo zodra er VP zijn. Automatische kijktijdpunten vereisen nog implementatie en verificatie van de StreamElements-adapter; alleen instellingen invullen maakt dat deel niet af.
 
 ## 1. Controleer GitHub
 
@@ -128,7 +128,7 @@ Veelvoorkomende fouten: onjuiste broadcaster-ID, ontbrekende clientcredentials o
 
 De webhookroute is gebouwd, maar EventSub-abonnementen zijn nog niet aangemaakt. Voor snellere statusupdates moeten `stream.online` en `stream.offline` voor de juiste broadcaster worden geregistreerd op `APP_URL/api/twitch/webhook`, met hetzelfde EVENTSUB_SECRET. Een werkende scheduler kan de status al ophalen zonder deze abonnementen. Laat registratie en verificatie als aparte integratiestap uitvoeren; alleen de webhook-URL invullen in Vercel maakt geen abonnement aan.
 
-Automatische kijktijdpunten zijn nog niet actief. Daarvoor volgen een echte read-only StreamElements-contractproef, geverifieerde accountmapping en de syncworker. StreamElements blijft uitsluitend kijktijdbron. De eigen PostgreSQL-database blijft de bron voor Vault Points. Er worden geen kansspellen, inzetten of uitbetalingen geactiveerd.
+Automatische kijktijdpunten zijn nog niet actief. Daarvoor volgen een echte read-only StreamElements-contractproef, geverifieerde accountmapping en de syncworker. StreamElements blijft uitsluitend kijktijdbron. De eigen PostgreSQL-database blijft de bron voor Vault Points. The Vault gebruikt alleen die gratis punten; zie `vault.md` voor de regels die het buiten de Kansspelwet houden.
 
 Voor openbaar gebruik moeten ook de echte contactgegevens en het definitieve privacy-/verwijderingsbeleid worden ingevuld. Bekijk `docs/handoff.md` voor de resterende productfasen. Een geslaagde deployment is geen bewijs dat alle externe integraties zijn getest.
 

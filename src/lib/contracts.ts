@@ -36,3 +36,28 @@ export interface LedgerView {
   createdAt: string;
   reason: string | null;
 }
+export interface VaultRoundView {
+  id: string;
+  game: string;
+  stake: string;
+  payout: string;
+  net: string;
+  balanceAfter: string;
+  bet: Record<string, unknown>;
+  outcome: Record<string, unknown>;
+  createdAt: string;
+}
+export type LeaderboardPeriod = 'all' | 'month';
+export interface LeaderboardEntryView {
+  rank: number;
+  name: string;
+  avatarUrl: string | null;
+  value: string;
+  you: boolean;
+}
+export interface LeaderboardView {
+  period: LeaderboardPeriod;
+  since: string | null;
+  entries: LeaderboardEntryView[];
+  viewer: { listed: boolean; rank: number | null; value: string } | null;
+}

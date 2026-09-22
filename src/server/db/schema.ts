@@ -9,6 +9,7 @@ import {
   boolean,
   jsonb,
   check,
+  index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
@@ -143,11 +144,34 @@ export const ledger = pgTable(
     createdAt: time('created_at'),
   },
   (t) => [
-    check('ledger_allowed_type', sql`${t.type} IN ('watchtime', 'admin_correction')`),
+    check('ledger_allowed_type', sql`${t.type} IN ('watchtime', 'admin_correction', 'game')`),
     check(
       'ledger_valid_amount',
       sql`${t.amount} <> 0 AND (${t.type} <> 'watchtime' OR ${t.amount} > 0)`,
     ),
+    index('ledger_created_user').on(t.createdAt, t.userId),
+  ],
+);
+/** One settled Vault round. Stake and payout are free Vault Points only; the ledger holds the net. */
+export const gameRounds = pgTable(
+  'game_rounds',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    game: text('game').notNull(),
+    stake: bigint('stake', { mode: 'bigint' }).notNull(),
+    payout: bigint('payout', { mode: 'bigint' }).notNull(),
+    balanceAfter: bigint('balance_after', { mode: 'bigint' }).notNull(),
+    bet: jsonb('bet').notNull(),
+    outcome: jsonb('outcome').notNull(),
+    idempotencyKey: text('idempotency_key').notNull().unique(),
+    createdAt: time('created_at'),
+  },
+  (t) => [
+    check('game_round_values', sql`${t.stake} > 0 AND ${t.payout} >= 0 AND ${t.balanceAfter} >= 0`),
+    index('game_rounds_user_created').on(t.userId, t.createdAt),
   ],
 );
 export const streamStates = pgTable('stream_states', {

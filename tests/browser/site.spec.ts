@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
-test('responsive Frost Orbit routes, no overflow and no game actions', async ({ page }) => {
+test('responsive Frost Orbit routes without horizontal overflow', async ({ page }) => {
   await mkdir('docs/screenshots', { recursive: true });
   for (const width of [360, 390, 430, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
@@ -19,11 +19,79 @@ test('responsive Frost Orbit routes, no overflow and no game actions', async ({ 
         });
     }
   }
+  await page.setViewportSize({ width: 390, height: 900 });
   await page.goto('/vault');
-  await expect(page.getByText('Under construction', { exact: true })).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: /inzetten|uitbetalen|play|spin|crash/i }),
-  ).toHaveCount(0);
+  for (const game of ['Coinflip', 'Dice', 'Orbit Slots', 'Roulette']) {
+    await page.getByRole('tab', { name: new RegExp(game) }).click();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+      `${game} at 390px`,
+    ).toBe(true);
+  }
+});
+test('the Vault plays one paced round at a time and ranks opted-in players', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  // Expected 401/429 responses are logged by the browser; anything else (e.g. React key warnings) fails.
+  page.on('console', (message) => {
+    if (message.type() === 'error' && !message.text().startsWith('Failed to load resource'))
+      errors.push(message.text());
+  });
+  const plays: number[] = [];
+  page.on('response', (response) => {
+    if (response.url().endsWith('/api/vault/play')) plays.push(response.status());
+  });
+  await page.goto('/vault');
+  await expect(page.getByRole('button', { name: 'Gooi de munt' })).toBeDisabled();
+  await page.locator('header').getByRole('button', { name: 'Demo-account' }).click();
+  await expect(page.locator('.vault-wallet')).toContainText('80');
+
+  // Hammering the button only ever sends one round; the button stays busy for the whole animation.
+  const flip = page.locator('.play-button');
+  await flip.click();
+  await expect(flip).toBeDisabled();
+  for (let i = 0; i < 8; i++) await flip.click({ force: true, timeout: 200 }).catch(() => {});
+  await expect(page.locator('.game-result')).toContainText(/Gewonnen|Helaas/, { timeout: 5000 });
+  await expect(flip).toBeEnabled();
+  expect(plays).toEqual([200]);
+  const [round] = (await (await page.request.get('/api/vault/rounds')).json()).rounds;
+  await expect(page.locator('.vault-wallet strong')).toContainText(round.balanceAfter);
+
+  // Scripts that bypass the UI are paced by the server as well.
+  const burst = await page.evaluate(() =>
+    Promise.all(
+      Array.from({ length: 5 }, () =>
+        fetch('/api/vault/play', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            game: 'coinflip',
+            bet: { stake: '10', side: 'tails' },
+            key: crypto.randomUUID(),
+          }),
+        }).then((response) => response.status),
+      ),
+    ),
+  );
+  expect(burst.filter((status) => status === 200).length).toBeLessThanOrEqual(1);
+  expect(burst.filter((status) => status === 429).length).toBeGreaterThanOrEqual(4);
+  const forged = await page.request.post('/api/vault/play', {
+    headers: { origin: 'https://evil.example' },
+    data: { game: 'coinflip', bet: { stake: '10', side: 'heads' }, key: crypto.randomUUID() },
+  });
+  expect(forged.status()).toBe(403);
+
+  await page.getByRole('button', { name: 'Toon mij in het leaderboard' }).click();
+  await expect(page.locator('.leaderboard-list li.you')).toContainText('Demo Crew Member');
+  await page.getByRole('tab', { name: 'Deze maand' }).click();
+  await expect(page.locator('.leaderboard-viewer')).toContainText(/#\d+|Nog geen stijging/);
+
+  await page.getByRole('tab', { name: /Roulette/ }).click();
+  await page.locator('.board-spot', { hasText: 'Zwart' }).click();
+  await expect(page.locator('.roulette')).toContainText('Totale inzet 10 VP');
+  await page.goto('/account');
+  await expect(page.locator('.ledger-row').first()).toContainText('The Vault · Coinflip');
+  expect(errors).toEqual([]);
 });
 test('demo account persists, uses paginated ledger, protects writes and revokes logout', async ({
   page,
