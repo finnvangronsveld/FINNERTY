@@ -2,7 +2,9 @@ import { and, eq, lt, or, isNull } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 import { authAccounts, oauthFlows, requestLimits, sessions } from '@/server/db/schema';
 import { privateJson } from '@/server/http';
-import { authorizedJob, streamConfiguration } from '@/server/jobs';
+import { authorizedJob, streamConfiguration, watchtimeConfiguration } from '@/server/jobs';
+import { streamElementsReadOnly } from '@/server/integrations/streamelements';
+import { syncWatchtime } from '@/server/watchtime/sync';
 import { refreshStream } from '@/server/integrations/twitch-stream';
 import { twitchOAuth } from '@/server/integrations/twitch-oauth';
 import { authConfiguration } from '@/server/auth/config';
@@ -16,7 +18,8 @@ async function maintenance(request: Request) {
   if (!config) return privateJson({ error: 'Koppeling niet geconfigureerd.' }, 503);
   try {
     // Stop starting new work after 45 seconds; allow in-flight provider calls to finish.
-    const deadline = Date.now() + 45_000;
+    const startedAt = Date.now();
+    const deadline = startedAt + 45_000;
     const db = await getDb();
     const stream = await refreshStream(db, config);
     const auth = authConfiguration();
@@ -52,7 +55,19 @@ async function maintenance(request: Request) {
     await db.delete(oauthFlows).where(lt(oauthFlows.expiresAt, new Date()));
     await db.delete(sessions).where(lt(sessions.expiresAt, new Date()));
     await db.delete(requestLimits).where(lt(requestLimits.expiresAt, new Date()));
-    return privateJson({ stream: stream.status, validated, watchtime: 'contract_not_verified' });
+    // Watch time runs last and on its own schedule (every 10 minutes); a StreamElements outage
+    // is reported but never fails the rest of maintenance.
+    const watchtimeConfig = watchtimeConfiguration();
+    const watchtime = watchtimeConfig
+      ? await syncWatchtime(
+          db,
+          streamElementsReadOnly(watchtimeConfig.jwt),
+          watchtimeConfig,
+          new Date(),
+          startedAt + 100_000,
+        ).catch(() => ({ status: 'error' as const, code: 'WATCHTIME_SYNC_FAILED' }))
+      : { status: 'not_configured' as const };
+    return privateJson({ stream: stream.status, validated, watchtime });
   } catch {
     return privateJson({ error: 'Onderhoud tijdelijk niet beschikbaar.' }, 503);
   }

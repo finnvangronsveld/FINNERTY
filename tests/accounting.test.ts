@@ -18,7 +18,7 @@ import { creditWatchtime, correctBalance, recordMonthMark } from '../src/server/
 import { monthKey } from '../src/server/month';
 import {
   collectWatchtime,
-  normalizeUnverifiedStreamElementsResponse,
+  parseStreamElementsWatchtimePage,
   normalizedWatchtimeSchema,
 } from '../src/server/integrations/watchtime';
 import type { Database } from '../src/server/db/types';
@@ -247,10 +247,54 @@ test('complete pagination includes page two, validates records and fails closed 
   assert.throws(() =>
     normalizedWatchtimeSchema.parse({ ...record, watchtimeSeconds: '10 minutes' }),
   );
-  assert.throws(
-    () => normalizeUnverifiedStreamElementsResponse({ watchtime: 10, points: 5000 }),
-    /CONTRACT_NOT_VERIFIED/,
+  // The verified StreamElements shape: cumulative minutes per username; null past the end.
+  const observedAt = new Date('2026-09-22T12:00:00Z');
+  const page = parseStreamElementsWatchtimePage(
+    {
+      _total: 2,
+      users: [
+        { username: 'Crew_One', minutes: 90 },
+        { username: 'two', minutes: 0 },
+      ],
+    },
+    observedAt,
   );
+  assert.equal(page.total, 2);
+  assert.deepEqual(page.records[0], {
+    providerAccountKey: 'crew_one',
+    twitchUserId: null,
+    providerUsername: 'Crew_One',
+    watchtimeSeconds: 5400n,
+    observedAt,
+  });
+  assert.deepEqual(
+    parseStreamElementsWatchtimePage({ _total: 2, users: null }, observedAt).records,
+    [],
+  );
+  // Seen live: a row with an empty username. It can never map to an account, so it is skipped
+  // (but still counted for pagination) instead of failing the whole scan.
+  const odd = parseStreamElementsWatchtimePage(
+    {
+      _total: 3,
+      users: [
+        { username: '', minutes: 5 },
+        { username: 'ok_1', minutes: 1 },
+      ],
+    },
+    observedAt,
+  );
+  assert.equal(odd.rows, 2);
+  assert.deepEqual(
+    odd.records.map((r) => r.providerAccountKey),
+    ['ok_1'],
+  );
+  for (const unverified of [
+    { watchtime: 10, points: 5000 },
+    { _total: 1, users: [{ username: 'x', minutes: -1 }] },
+    { _total: 1, users: [{ username: 'x', minutes: '10' }] },
+    { _total: 1, users: [{ username: 'x', minutes: 1.5 }] },
+  ])
+    assert.throws(() => parseStreamElementsWatchtimePage(unverified, observedAt));
 });
 
 const mark = (seconds: bigint, observedAt: string) => ({

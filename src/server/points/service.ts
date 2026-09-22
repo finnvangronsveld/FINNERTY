@@ -35,22 +35,38 @@ export const monthMarkSchema = z
   .strict();
 
 /**
- * Keeps the lowest cumulative watch time seen for a viewer in each Belgian month. The sync calls
+ * Keeps the lowest cumulative watch time seen for each viewer in each Belgian month. The sync calls
  * this for every viewer on every page, including viewers without a site account yet.
  */
-export async function recordMonthMark(db: Database, input: z.infer<typeof monthMarkSchema>) {
-  const mark = monthMarkSchema.parse(input);
-  await db
-    .insert(monthMarks)
-    .values({ ...mark, month: monthKey(mark.observedAt) })
-    .onConflictDoUpdate({
-      target: [monthMarks.provider, monthMarks.channelId, monthMarks.providerKey, monthMarks.month],
-      set: {
-        seconds: sql`LEAST(${monthMarks.seconds}, excluded.seconds)`,
-        observedAt: sql`LEAST(${monthMarks.observedAt}, excluded.observed_at)`,
-      },
-    });
+export async function recordMonthMarks(db: Database, input: z.infer<typeof monthMarkSchema>[]) {
+  // One row per viewer and month (an upsert cannot touch the same row twice); lowest value wins.
+  const lowest = new Map<string, z.infer<typeof monthMarkSchema> & { month: string }>();
+  for (const mark of input) {
+    const parsed = { ...monthMarkSchema.parse(mark), month: monthKey(mark.observedAt) };
+    const key = [parsed.provider, parsed.channelId, parsed.providerKey, parsed.month].join('|');
+    const current = lowest.get(key);
+    if (!current || parsed.seconds < current.seconds) lowest.set(key, parsed);
+  }
+  const marks = [...lowest.values()];
+  for (let index = 0; index < marks.length; index += 500)
+    await db
+      .insert(monthMarks)
+      .values(marks.slice(index, index + 500))
+      .onConflictDoUpdate({
+        target: [
+          monthMarks.provider,
+          monthMarks.channelId,
+          monthMarks.providerKey,
+          monthMarks.month,
+        ],
+        set: {
+          seconds: sql`LEAST(${monthMarks.seconds}, excluded.seconds)`,
+          observedAt: sql`LEAST(${monthMarks.observedAt}, excluded.observed_at)`,
+        },
+      });
 }
+export const recordMonthMark = (db: Database, mark: z.infer<typeof monthMarkSchema>) =>
+  recordMonthMarks(db, [mark]);
 
 /** Only consumes verified, normalized observations. Never receives raw provider data. */
 export async function creditWatchtime(db: Database, input: Observation) {

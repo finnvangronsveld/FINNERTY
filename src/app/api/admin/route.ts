@@ -1,7 +1,15 @@
 import { privateJson } from '@/server/http';
 import { currentAdminId } from '@/server/auth/admin';
 import { getDb } from '@/server/db';
-import { users, wallets, authAccounts, externalIdentities, streamStates } from '@/server/db/schema';
+import {
+  users,
+  wallets,
+  authAccounts,
+  externalIdentities,
+  streamStates,
+  syncJobs,
+} from '@/server/db/schema';
+import { WATCHTIME_JOB } from '@/server/watchtime/sync';
 import { eq, ilike, count, ne } from 'drizzle-orm';
 export async function GET(request: Request) {
   if (!(await currentAdminId()))
@@ -40,12 +48,16 @@ export async function GET(request: Request) {
       errorCode: streamStates.errorCode,
     })
     .from(streamStates);
+  const [job] = await db.select().from(syncJobs).where(eq(syncJobs.kind, WATCHTIME_JOB));
+  const watchtime = job
+    ? `${job.status}${job.errorCode ? ` (${job.errorCode})` : ''} · volgende ${job.nextRunAt.toISOString()}`
+    : 'nog niet gestart';
   return privateJson({
     accounts: accounts.map((a) => ({
       ...a,
       balance: a.balance.toString(),
       totalEarned: a.totalEarned.toString(),
     })),
-    health: { stream: states, mappingIssues: conflicts.count, watchtime: 'contract_not_verified' },
+    health: { stream: states, mappingIssues: conflicts.count, watchtime },
   });
 }

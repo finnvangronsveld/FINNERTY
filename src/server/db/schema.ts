@@ -208,16 +208,20 @@ export const streamStates = pgTable('stream_states', {
   failures: integer('failures').notNull().default(0),
   errorCode: text('error_code'),
 });
-export const syncJobs = pgTable('sync_jobs', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  kind: text('kind').notNull(),
-  status: text('status').notNull(),
-  cursor: text('cursor'),
-  attempts: integer('attempts').notNull().default(0),
-  lockedUntil: timestamp('locked_until', { withTimezone: true }),
-  nextRunAt: time('next_run_at'),
-  errorCode: text('error_code'),
-});
+export const syncJobs = pgTable(
+  'sync_jobs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    kind: text('kind').notNull(),
+    status: text('status').notNull(),
+    cursor: text('cursor'),
+    attempts: integer('attempts').notNull().default(0),
+    lockedUntil: timestamp('locked_until', { withTimezone: true }),
+    nextRunAt: time('next_run_at'),
+    errorCode: text('error_code'),
+  },
+  (t) => [uniqueIndex('sync_jobs_kind_unique').on(t.kind)],
+);
 export const processedEvents = pgTable('processed_events', {
   id: text('id').primaryKey(),
   processedAt: time('processed_at'),

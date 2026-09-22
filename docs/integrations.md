@@ -17,7 +17,19 @@ Documentatie gecontroleerd op 13 september 2026; geen echte credentials gebruikt
 
 [OpenAPI](https://raw.githubusercontent.com/StreamElements/api-docs/main/api.yaml) bevat `GET /channels/me` en gepagineerd `GET /points/{channel}/watchtime` met limit/offset. Het kijktijdresponsmodel is leeg/onvoldoende voor een bewezen parser. [JWT-toegang](https://github.com/StreamElements/api-docs/blob/main/docs/Personal%20Access.md) is server-side Bearer-authenticatie.
 
-`streamElementsReadOnly` heeft alleen twee GET-methoden. Er zijn geen puntenmutaties. `normalizeUnverifiedStreamElementsResponse` weigert bewust elke onbewezen respons. Het eigen contract heeft onder meer `providerAccountKey`, `twitchUserId`, `providerUsername`, `watchtimeSeconds` (bigint) en `observedAt`; dit zijn **onze velden**, geen veronderstelde providerkeys.
+`streamElementsReadOnly` heeft alleen twee GET-methoden. Er zijn geen puntenmutaties. Het eigen contract heeft onder meer `providerAccountKey`, `twitchUserId`, `providerUsername`, `watchtimeSeconds` (bigint) en `observedAt`; dit zijn **onze velden**.
+
+### Contractproef uitgevoerd — 22 september 2026 (read-only, echte account)
+
+- `/channels/me`: `_id` = `STREAMELEMENTS_CHANNEL_ID`, `provider: twitch`, `providerId` = broadcaster-ID 442232328, `username: finnerty_`. Kanaalidentiteit bewezen; de sync controleert dit bij elke run opnieuw en stopt bij een afwijking.
+- `/points/{channel}/watchtime?limit&offset`: `{ _total, users: [{ username, minutes }] }`, aflopend gesorteerd op minuten, cumulatief. Eenheid **minuten** (veldnaam, en gelijk aan `watchtime` in `/points/{channel}/{user}`). `limit` tot 100 werkt; pagina's overlappen niet; voorbij het einde is `users` **null**. Geen Twitch-ID: sleutel = gebruikersnaam.
+- De lijst is publiek: een ongeldige token krijgt ook 200. De JWT is alleen nodig voor `/channels/me`.
+- Echte data (4.111 rijen) bevatte één rij met lege gebruikersnaam; zulke rijen worden overgeslagen (tellen wel mee voor paginering). Andere afwijkingen (structuur, niet-gehele minuten) stoppen de run: `STREAMELEMENTS_RESPONSE_CHANGED`.
+- Lokale droogloop tegen de echte API met een wegwerpdatabase: 4.110 kijkers, 43 requests, ~5 s.
+
+### Syncworker (`src/server/watchtime/sync.ts`)
+
+Draait in de onderhoudsroute, maximaal elke 10 minuten onder een DB-lease (`sync_jobs`, uniek per `kind`), met exponentiële backoff (2–60 min) bij fouten. Per run: kanaal verifiëren → eerste puntenregel aanmaken als die ontbreekt (`POINTS_PER_INTERVAL`/`POINTS_INTERVAL_SECONDS`, standaard 10 VP per 600 s, `current_month`) → elk Twitch-account koppelen aan de StreamElements-gebruikersnaam met dezelfde huidige login → alle kijkers scannen (bij verschuivende ranglijst de hoogste waarde houden) → maandijkpunten voor iedereen → `creditWatchtime` per gekoppeld account (fouten per account geïsoleerd). Naamswijzigingen pauzeren de koppeling (bestaand gedrag in `identity.ts`); een gerecyclede naam die al aan een ander account hangt, wordt niet gekoppeld.
 
 ### Echte read-only proef vóór aansluiting
 
@@ -29,9 +41,9 @@ Documentatie gecontroleerd op 13 september 2026; geen echte credentials gebruikt
 6. Verifieer trackinggedrag bij Twitch zelf, embed met/zonder chat en mobiel volgens de [loyalty-uitleg](https://support.streamelements.com/hc/en-us/articles/10474478470290-Loyalty-System-The-Complete-Guide-Setup-Leaderboard-Points). Kijktijdregistratie is geen onafhankelijk bewijs van iedere bekeken seconde.
 7. Voeg centrale bounded syncjobs toe (start 5–10 minuten), met DB-leases, paginacursors, retries/backoff en mappingconflicten. Laat ook afwezige sitegebruikers inhalen.
 
-Tot dit bewezen is, zijn **alleen demo-credits mogelijk**. Er is geen extra rewardbron via player-heartbeats.
+Er is geen extra rewardbron via player-heartbeats. Kijktijd is StreamElements-registratie (chatlijst), geen onafhankelijk bewijs van iedere bekeken seconde.
 
-**Maandinhaal bij eerste login (beslist 2026-09-22).** StreamElements levert kijktijd alleen als cumulatief totaal, zonder maand- of periodefilter (gecontroleerd in de OpenAPI: `period` bestaat alleen voor activities en sessions). De syncworker moet daarom voor **elke** kijker op elke pagina `recordMonthMark` aanroepen, ook zonder siteaccount, met dezelfde `provider`/`channelId`/`providerKey` als de latere `external_identities`. `creditWatchtime` krediteert bij de eerste waarneming van een account eenmalig het verschil met dat maandijkpunt. Een maand telt pas volledig als de sync vanaf het begin van die maand draait; daarvóór is er geen ijkpunt en geen inhaal.
+**Maandinhaal bij eerste login (beslist 2026-09-22).** StreamElements levert kijktijd alleen als cumulatief totaal, zonder maand- of periodefilter (gecontroleerd in de OpenAPI: `period` bestaat alleen voor activities en sessions). De syncworker moet daarom voor **elke** kijker op elke pagina `recordMonthMark` aanroepen, ook zonder siteaccount, met dezelfde `provider`/`channelId`/`providerKey` als de latere `external_identities` (gebeurt in `syncWatchtime`). `creditWatchtime` krediteert bij de eerste waarneming van een account eenmalig het verschil met dat maandijkpunt. Een maand telt pas volledig als de sync vanaf het begin van die maand draait; daarvóór is er geen ijkpunt en geen inhaal.
 
 ## Database en hosting
 

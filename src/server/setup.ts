@@ -42,6 +42,15 @@ export function setupReport(env: Env = process.env) {
     (env.JOB_SECRET?.trim().length ?? 0) >= 32 || (env.CRON_SECRET?.trim().length ?? 0) >= 32
       ? []
       : ['JOB_SECRET_MISSING_OR_SHORTER_THAN_32'];
+  const watchtime = [...stream];
+  if (!env.STREAMELEMENTS_JWT?.trim()) watchtime.push('STREAMELEMENTS_JWT_MISSING');
+  if (!/^[a-f0-9]{24}$/.test(env.STREAMELEMENTS_CHANNEL_ID?.trim() ?? ''))
+    watchtime.push('STREAMELEMENTS_CHANNEL_ID_INVALID');
   const ready = (issues: string[]) => (issues.length ? issues : 'ready');
-  return { login: ready(login), stream: ready(stream), scheduler: ready(scheduler) };
+  return {
+    login: ready(login),
+    stream: ready(stream),
+    watchtime: ready(watchtime),
+    scheduler: ready(scheduler),
+  };
 }

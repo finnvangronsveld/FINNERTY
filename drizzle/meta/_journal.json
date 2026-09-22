@@ -50,6 +50,13 @@
       "when": 1790080023252,
       "tag": "0006_violet_moondragon",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790081930716,
+      "tag": "0007_common_sentinel",
+      "breakpoints": true
     }
   ]
 }

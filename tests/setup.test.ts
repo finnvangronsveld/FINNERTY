@@ -13,10 +13,20 @@ const complete = {
   TWITCH_BROADCASTER_ID: '442232328',
   TWITCH_CHANNEL_LOGIN: 'finnerty_',
   JOB_SECRET: 'x'.repeat(44),
+  STREAMELEMENTS_JWT: 'jwt',
+  STREAMELEMENTS_CHANNEL_ID: '5ee67bb6e5d09373a3cc3e5f',
 };
 
 test('a complete production setup reports every feature ready', () => {
-  assert.deepEqual(setupReport(complete), { login: 'ready', stream: 'ready', scheduler: 'ready' });
+  assert.deepEqual(setupReport(complete), {
+    login: 'ready',
+    stream: 'ready',
+    watchtime: 'ready',
+    scheduler: 'ready',
+  });
+  assert.deepEqual(setupReport({ ...complete, STREAMELEMENTS_CHANNEL_ID: 'finnerty_' }).watchtime, [
+    'STREAMELEMENTS_CHANNEL_ID_INVALID',
+  ]);
 });
 
 test('setup issues name the failing requirement without echoing any value', () => {

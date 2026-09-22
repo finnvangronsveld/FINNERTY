@@ -35,7 +35,41 @@ export async function collectWatchtime(adapter: VerifiedWatchtimeAdapter, maxPag
   }
   throw new Error('INCOMPLETE_PROVIDER_SCAN'); // Never interpret an incomplete scan as missing or zero.
 }
-export function normalizeUnverifiedStreamElementsResponse(_raw: unknown): never {
-  void _raw;
-  throw new Error('STREAMELEMENTS_CONTRACT_NOT_VERIFIED');
+/**
+ * `GET /points/{channel}/watchtime?limit&offset`, verified read-only against the live API on
+ * 2026-09-22: `{ _total, users: [{ username, minutes }] | null }`, sorted by minutes descending.
+ * `users` is null past the end. Viewers are keyed by Twitch username only; minutes are cumulative.
+ * The live list contains the odd row without a valid username (seen: an empty one); such a row can
+ * never map to an account, so it is skipped instead of failing the whole scan.
+ */
+export const streamElementsWatchtimePageSchema = z.object({
+  _total: z.number().int().nonnegative(),
+  users: z
+    .array(
+      z.object({
+        username: z.string().max(100),
+        minutes: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+      }),
+    )
+    .nullable(),
+});
+
+export function parseStreamElementsWatchtimePage(raw: unknown, observedAt: Date) {
+  const page = streamElementsWatchtimePageSchema.parse(raw);
+  return {
+    total: page._total,
+    /** Rows read from this page, including skipped ones, so pagination advances correctly. */
+    rows: page.users?.length ?? 0,
+    records: (page.users ?? [])
+      .filter((user) => /^[A-Za-z0-9_]{1,25}$/.test(user.username))
+      .map((user) =>
+        normalizedWatchtimeSchema.parse({
+          providerAccountKey: user.username.toLowerCase(),
+          twitchUserId: null,
+          providerUsername: user.username,
+          watchtimeSeconds: BigInt(user.minutes) * 60n,
+          observedAt,
+        }),
+      ),
+  };
 }

@@ -28,4 +28,6 @@
 - Leaderboards zijn opt-out (eigenaar, 2026-09-22): `users.listed` standaard `true`. Alleen de openbare Twitch-naam, avatar en punten; uitzetten met één klik in het account; vermeld op de privacypagina. Bestaande accounts niet overschreven.
 - Maandinhaal bij eerste login (eigenaar, 2026-09-22): `point_rules.historical_import = 'current_month'` (nieuwe standaard). De sync legt per kijker het laagste cumulatieve totaal per Belgische maand vast (`watchtime_month_marks`); de eerste waarneming van een nieuw account krediteert eenmalig het verschil, met reden in het journaal. Alleen kijktijd die de site zelf heeft waargenomen telt; vorige maanden niet. `off` blijft mogelijk per regelversie.
 
+2026-09-22 — StreamElements-kijktijd live na read-only contractproef op de echte account (zie `integrations.md`). Sleutel = Twitch-gebruikersnaam (de API levert geen ID); koppeling alleen op de huidige login, naamswijziging pauzeert. Lege/ongeldige gebruikersnamen worden overgeslagen, andere formaatwijzigingen stoppen de run. Eerste puntenregel 10 VP per 10 minuten met `current_month`.
+
 Open: geverifieerde Twitch-login/ID, Discord-link, database-engine/inhoud, daadwerkelijke Vercel-koppeling en scheduler, echte StreamElements-response en eenheid, definitieve puntennaam en koers, eigenaar/contactgegevens voor privacy.

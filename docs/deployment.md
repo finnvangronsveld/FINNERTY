@@ -1,6 +1,6 @@
 # Finnerty online zetten: stap voor stap
 
-Gebruik Vercel voor de Next.js-website en Neon voor je eigen PostgreSQL-database. De eerste deployment kan al zonder credentials. Daarna activeer je achtereenvolgens de database, Twitch-login en onderhoud. The Vault (gameroom) werkt pas met saldo zodra er VP zijn. Automatische kijktijdpunten vereisen nog implementatie en verificatie van de StreamElements-adapter; alleen instellingen invullen maakt dat deel niet af.
+Gebruik Vercel voor de Next.js-website en Neon voor je eigen PostgreSQL-database. De eerste deployment kan al zonder credentials. Daarna activeer je achtereenvolgens de database, Twitch-login en onderhoud. The Vault (gameroom) werkt pas met saldo zodra er VP zijn. Kijktijdpunten komen van de StreamElements-sync, die meeloopt met de onderhoudstaak (stap 8).
 
 ## 1. Controleer GitHub
 
@@ -84,7 +84,7 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 
 Sla de waarden op in je passwordmanager. Verander `AUTH_SECRET` later niet zomaar: bestaande Twitch-tokens zijn daarmee versleuteld. Geef secrets nooit een `NEXT_PUBLIC_`-prefix.
 
-Laat `STREAMELEMENTS_JWT` en `STREAMELEMENTS_CHANNEL_ID` voorlopig leeg. De puntennaam valt standaard terug op Vault Points en VP. Laat `HISTORICAL_IMPORT` op `off` als je die instelling toevoegt.
+Vul `STREAMELEMENTS_JWT` (Sensitive) en `STREAMELEMENTS_CHANNEL_ID` (de 24-tekens Account ID) in via streamelements.com/dashboard/account/channels → Show secrets. Optioneel: `POINTS_PER_INTERVAL` en `POINTS_INTERVAL_SECONDS` voor de eerste puntenregel (standaard 10 VP per 600 s); daarna is de regel in de database leidend. De puntennaam valt standaard terug op Vault Points en VP.
 
 Ga naar **Deployments → laatste productie-deployment → Redeploy**. Environmentwijzigingen gelden pas in een nieuwe deployment.
 
@@ -128,7 +128,7 @@ Veelvoorkomende fouten: onjuiste broadcaster-ID, ontbrekende clientcredentials o
 
 De webhookroute is gebouwd, maar EventSub-abonnementen zijn nog niet aangemaakt. Voor snellere statusupdates moeten `stream.online` en `stream.offline` voor de juiste broadcaster worden geregistreerd op `APP_URL/api/twitch/webhook`, met hetzelfde EVENTSUB_SECRET. Een werkende scheduler kan de status al ophalen zonder deze abonnementen. Laat registratie en verificatie als aparte integratiestap uitvoeren; alleen de webhook-URL invullen in Vercel maakt geen abonnement aan.
 
-Automatische kijktijdpunten zijn nog niet actief. Daarvoor volgen een echte read-only StreamElements-contractproef, geverifieerde accountmapping en de syncworker. StreamElements blijft uitsluitend kijktijdbron. De eigen PostgreSQL-database blijft de bron voor Vault Points. The Vault gebruikt alleen die gratis punten; zie `vault.md` voor de regels die het buiten de Kansspelwet houden.
+Kijktijdpunten lopen via de StreamElements-sync in de onderhoudstaak (elke 10 minuten; zie `integrations.md`). Zonder scheduler worden er geen punten toegekend. StreamElements blijft uitsluitend kijktijdbron; StreamElements-punten worden nooit gelezen of aangepast. De eigen PostgreSQL-database blijft de bron voor Vault Points. The Vault gebruikt alleen die gratis punten; zie `vault.md` voor de regels die het buiten de Kansspelwet houden.
 
 Voor openbaar gebruik moeten ook de echte contactgegevens en het definitieve privacy-/verwijderingsbeleid worden ingevuld. Bekijk `docs/handoff.md` voor de resterende productfasen. Een geslaagde deployment is geen bewijs dat alle externe integraties zijn getest.
 

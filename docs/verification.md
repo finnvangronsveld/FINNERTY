@@ -37,3 +37,13 @@ De tests tonen een controleerbare lokale basis. Ze zijn geen verklaring dat v1 o
 | Overflow 360/390/430/768/1440 | Geslaagd | Alle vier spellen, zonder horizontale scroll                                                                  |
 
 Niet bewezen: tempo en walletlock met meerdere echte PostgreSQL-verbindingen (PGlite serialiseert), en animatieprestaties op een fysieke middelmatige telefoon.
+
+## StreamElements-kijktijd — 22 september 2026
+
+| Controle                   | Uitkomst | Reikwijdte                                                                                                   |
+| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| Read-only contractproef    | Geslaagd | Echte account: kanaal-ID, provider, broadcaster-ID; vorm, eenheid (minuten), paginering, einde (`null`)      |
+| Droogloop sync (echte API) | Geslaagd | 4.110 kijkers, 43 requests, ~5 s, in een wegwerpdatabase; één lege gebruikersnaam overgeslagen               |
+| Synctests (PGlite)         | Geslaagd | Koppeling, maandijkpunt voor iedereen, tempo 10 min, inhaal na latere login, kanaal-/vormafwijking + backoff |
+
+Niet bewezen: een volledige productierun via de scheduler (die draait nog niet) en StreamElements-rate-limits bij langdurig gebruik.

@@ -44,3 +44,21 @@ export function streamConfiguration(): StreamCredentials | null {
     secret: AUTH_SECRET,
   };
 }
+function positiveInteger(value: string | undefined, fallback: bigint) {
+  return value && /^[1-9][0-9]{0,8}$/.test(value.trim()) ? BigInt(value.trim()) : fallback;
+}
+/** StreamElements watch-time sync: needs the stream setup plus a JWT and the 24-hex channel id. */
+export function watchtimeConfiguration() {
+  const stream = streamConfiguration();
+  const jwt = process.env.STREAMELEMENTS_JWT?.trim();
+  const channelId = process.env.STREAMELEMENTS_CHANNEL_ID?.trim();
+  if (!stream || !jwt || !channelId || !/^[a-f0-9]{24}$/.test(channelId)) return null;
+  return {
+    jwt,
+    channelId,
+    broadcasterId: stream.broadcasterId,
+    // First-install rate only; the versioned point rule in the database stays authoritative.
+    pointsPerInterval: positiveInteger(process.env.POINTS_PER_INTERVAL, 10n),
+    intervalSeconds: positiveInteger(process.env.POINTS_INTERVAL_SECONDS, 600n),
+  };
+}

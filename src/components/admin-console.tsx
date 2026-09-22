@@ -94,7 +94,7 @@ export function AdminConsole() {
         <ShieldCheck />
         <p>
           {health
-            ? `${health.mappingIssues} mappings vragen aandacht. StreamElements-kijktijd wacht op een geverifieerd datacontract.`
+            ? `${health.mappingIssues} mappings vragen aandacht. StreamElements-kijktijd: ${health.watchtime}.`
             : 'Koppelingen controleren…'}
         </p>
       </div>
