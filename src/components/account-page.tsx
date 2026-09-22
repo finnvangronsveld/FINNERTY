@@ -149,19 +149,21 @@ export function AccountPage() {
               <p>
                 {config.demo
                   ? 'Lokale demo · geen externe verbinding'
-                  : account.syncStatus === 'not_connected'
-                    ? 'Kijktijdkoppeling nog niet geverifieerd'
-                    : account.syncStatus === 'name_changed'
-                      ? 'Naamswijziging: controle nodig'
-                      : 'Koppeling controleren'}
+                  : account.syncStatus === 'verified'
+                    ? 'Gekoppeld met StreamElements · elke 10 minuten bijgewerkt'
+                    : account.syncStatus === 'not_connected'
+                      ? 'Wordt gekoppeld bij de volgende sync'
+                      : account.syncStatus === 'name_changed'
+                        ? 'Naamswijziging: controle nodig'
+                        : 'Koppeling controleren'}
               </p>
             </div>
           </div>
           <p className="points-note">
             <ShieldCheck size={17} />
-            Eigen punten in onze database. Historische kijktijd vormt eerst een basislijn. Punten
-            kun je niet kopen, overdragen of inwisselen; in The Vault speel je er alleen voor de
-            eer.
+            Eigen punten in onze database: 10 VP per 10 minuten kijken. Kijktijd van vóór je
+            koppeling telt één keer mee als welkomstbonus (met een maximum). Punten kun je niet
+            kopen, overdragen of inwisselen; in The Vault speel je er alleen voor de eer.
           </p>
           <div className="account-columns">
             <section className="ledger-panel">
@@ -196,9 +198,11 @@ export function AccountPage() {
                         <strong>
                           {entry.type === 'watchtime'
                             ? 'Geregistreerde kijktijd'
-                            : entry.type === 'game'
-                              ? `The Vault · ${GAME_INFO[entry.reason as GameId]?.name ?? 'Spel'}`
-                              : 'Beheercorrectie'}
+                            : entry.type === 'welcome_bonus'
+                              ? 'Welkomstbonus'
+                              : entry.type === 'game'
+                                ? `The Vault · ${GAME_INFO[entry.reason as GameId]?.name ?? 'Spel'}`
+                                : 'Beheercorrectie'}
                         </strong>
                         <span>
                           {new Date(entry.createdAt).toLocaleString('nl-BE')}

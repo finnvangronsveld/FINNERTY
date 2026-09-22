@@ -84,7 +84,7 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 
 Sla de waarden op in je passwordmanager. Verander `AUTH_SECRET` later niet zomaar: bestaande Twitch-tokens zijn daarmee versleuteld. Geef secrets nooit een `NEXT_PUBLIC_`-prefix.
 
-Vul `STREAMELEMENTS_JWT` (Sensitive) en `STREAMELEMENTS_CHANNEL_ID` (de 24-tekens Account ID) in via streamelements.com/dashboard/account/channels → Show secrets. Optioneel: `POINTS_PER_INTERVAL` en `POINTS_INTERVAL_SECONDS` voor de eerste puntenregel (standaard 10 VP per 600 s); daarna is de regel in de database leidend. De puntennaam valt standaard terug op Vault Points en VP.
+Vul `STREAMELEMENTS_JWT` (Sensitive) en `STREAMELEMENTS_CHANNEL_ID` (de 24-tekens Account ID) in via streamelements.com/dashboard/account/channels → Show secrets. Optioneel: `POINTS_PER_INTERVAL`, `POINTS_INTERVAL_SECONDS` en `WELCOME_BONUS_CAP` voor de eerste puntenregel (standaard 10 VP per 600 s en een welkomstbonus van max. 1.000 VP); daarna is de regel in de database leidend. De puntennaam valt standaard terug op Vault Points en VP.
 
 Ga naar **Deployments → laatste productie-deployment → Redeploy**. Environmentwijzigingen gelden pas in een nieuwe deployment.
 

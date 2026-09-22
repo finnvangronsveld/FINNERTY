@@ -20,6 +20,7 @@ De actuele gebruikersopdracht en volledige masterprompt zijn gelezen. De tekst i
 
 Voorlopige naam: Vault Points / VP. Serverconfiguratie bepaalt labels. De demo gebruikt regelversie 1: 10 VP per 600 nieuwe geregistreerde seconden. Dit is geen vastgestelde kanaaleconomie. De koers in de database is leidend; productie begint zonder regel of mapping en kan daardoor geen ongecontroleerde toekenning doen.
 
+- Welkomstbonus: kijktijd van vóór de koppeling telt één keer, tot `welcome_cap` (productie: 1.000 VP). Niet in het maandleaderboard.
 - Eerste login, beleid `current_month` (standaard): de eerste geldige waarneming krediteert eenmalig de kijktijd sinds het maandbegin-ijkpunt van die kijker (Belgische kalendermaand). Oudere maanden blijven basislijn. Zonder ijkpunt of met beleid `off` is de eerste waarneming alleen basislijn.
 - Alleen positieve gevalideerde delta’s onder dezelfde geverifieerde identiteit en hetzelfde brontijdperk tellen mee.
 - Resterende seconden worden bewaard. Lagere tellers, ontbrekende records en mappingconflicten geven geen reset of beloning.

@@ -30,4 +30,6 @@
 
 2026-09-22 — StreamElements-kijktijd live na read-only contractproef op de echte account (zie `integrations.md`). Sleutel = Twitch-gebruikersnaam (de API levert geen ID); koppeling alleen op de huidige login, naamswijziging pauzeert. Lege/ongeldige gebruikersnamen worden overgeslagen, andere formaatwijzigingen stoppen de run. Eerste puntenregel 10 VP per 10 minuten met `current_month`.
 
+2026-09-22 — Welkomstbonus (eigenaar koos „all-time, capped”). StreamElements kent alleen totale kijktijd, dus kijktijd van vóór het tellen kan niet per maand worden verdeeld. Elk account krijgt één keer `min(punten(baseline), welcome_cap)`: precies de nooit uitbetaalde kijktijd van vóór de koppeling (bij nieuwe leden: van vóór het maandijkpunt, dus zonder overlap met de maandinhaal). `point_rules.welcome_cap` (standaard 0; eerste installatie via `WELCOME_BONUS_CAP`, standaard 1.000); productieregel v1 handmatig op 1.000 gezet na backupbranch. Ledgertype `welcome_bonus` telt in saldo en totaal verdiend, niet in het maandleaderboard. Idempotent per account (`welcome:<userId>`), ook voor accounts die vóór de cap al gekoppeld waren.
+
 Open: geverifieerde Twitch-login/ID, Discord-link, database-engine/inhoud, daadwerkelijke Vercel-koppeling en scheduler, echte StreamElements-response en eenheid, definitieve puntennaam en koers, eigenaar/contactgegevens voor privacy.

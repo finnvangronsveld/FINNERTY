@@ -20,7 +20,7 @@ export async function GET() {
       .leftJoin(ledger, eq(ledger.userId, wallets.userId))
       .groupBy(wallets.userId, wallets.balance, wallets.totalEarned)
       .having(
-        sql`${wallets.balance} <> coalesce(sum(${ledger.amount}), 0) OR ${wallets.totalEarned} <> coalesce(sum(case when ${ledger.type} = 'watchtime' then ${ledger.amount} else 0 end), 0)`,
+        sql`${wallets.balance} <> coalesce(sum(${ledger.amount}), 0) OR ${wallets.totalEarned} <> coalesce(sum(case when ${ledger.type} in ('watchtime', 'welcome_bonus') then ${ledger.amount} else 0 end), 0)`,
       );
     const [stalled] = await db
       .select({ count: count() })

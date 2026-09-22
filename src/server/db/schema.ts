@@ -73,10 +73,15 @@ export const pointRules = pgTable(
     effectiveAt: time('effective_at'),
     /** 'current_month': the first verified observation also credits watch time since the viewer's month-start mark. */
     historicalImport: text('historical_import').notNull().default('current_month'),
+    /** Max VP granted once per account for watch time from before counting started; 0 = none. */
+    welcomeCap: bigint('welcome_cap', { mode: 'bigint' })
+      .notNull()
+      .default(sql`0`),
   },
   (t) => [
     check('positive_point_rule', sql`${t.intervalSeconds} > 0 AND ${t.points} > 0`),
     check('historical_import_policy', sql`${t.historicalImport} IN ('off', 'current_month')`),
+    check('welcome_cap_nonnegative', sql`${t.welcomeCap} >= 0`),
   ],
 );
 export const externalIdentities = pgTable(
@@ -166,10 +171,13 @@ export const ledger = pgTable(
     createdAt: time('created_at'),
   },
   (t) => [
-    check('ledger_allowed_type', sql`${t.type} IN ('watchtime', 'admin_correction', 'game')`),
+    check(
+      'ledger_allowed_type',
+      sql`${t.type} IN ('watchtime', 'admin_correction', 'game', 'welcome_bonus')`,
+    ),
     check(
       'ledger_valid_amount',
-      sql`${t.amount} <> 0 AND (${t.type} <> 'watchtime' OR ${t.amount} > 0)`,
+      sql`${t.amount} <> 0 AND (${t.type} NOT IN ('watchtime', 'welcome_bonus') OR ${t.amount} > 0)`,
     ),
     index('ledger_created_user').on(t.createdAt, t.userId),
   ],

@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, gte, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, gte, isNull, ne, sql } from 'drizzle-orm';
 import { ZodError } from 'zod';
 import type { Database } from '../db/types';
 import { gameRounds, ledger, users, wallets } from '../db/schema';
@@ -168,7 +168,8 @@ export async function leaderboard(
       value: sql<bigint>`sum(${ledger.amount})`.mapWith(BigInt).as('value'),
     })
     .from(ledger)
-    .where(gte(ledger.createdAt, since ?? new Date(0)))
+    // The one-time welcome bonus is history, not this month's activity.
+    .where(and(gte(ledger.createdAt, since ?? new Date(0)), ne(ledger.type, 'welcome_bonus')))
     .groupBy(ledger.userId)
     .as('monthly');
   const rows =

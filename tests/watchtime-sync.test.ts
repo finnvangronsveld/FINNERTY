@@ -29,6 +29,7 @@ const config = {
   broadcasterId: '442232328',
   pointsPerInterval: 10n,
   intervalSeconds: 600n,
+  welcomeCap: 1000n,
 };
 const at = (minutes: number) => new Date(Date.UTC(2026, 8, 10, 12, minutes));
 
@@ -76,9 +77,10 @@ test('the sync links members, marks every viewer and credits watch time every 10
     const crew = await member(f.db, 'Crew_One');
     const se = fakeStreamElements({ crew_one: 100, stranger: 500, some_bot: 9000 });
     const first = await syncWatchtime(f.db, se.client, config, at(0));
-    assert.deepEqual(first, { status: 'ok', viewers: 3, accounts: 1, credited: 0, failed: 0 });
+    assert.deepEqual(first, { status: 'ok', viewers: 3, accounts: 1, credited: 1, failed: 0 });
     const [rule] = await f.db.select().from(pointRules);
     assert.equal(rule.historicalImport, 'current_month');
+    assert.equal(rule.welcomeCap, 1000n);
     assert.equal(
       (await f.db.select().from(monthMarks)).length,
       3,
@@ -87,12 +89,12 @@ test('the sync links members, marks every viewer and credits watch time every 10
     const [identity] = await f.db.select().from(externalIdentities);
     assert.equal(identity.providerKey, 'crew_one');
     assert.equal(identity.status, 'verified');
-    assert.equal(await balanceOf(f.db, crew.id), 0n, 'already a member: baseline, no catch-up');
+    assert.equal(await balanceOf(f.db, crew.id), 100n, 'welcome bonus for 100 earlier minutes');
 
     se.minutes.crew_one = 120;
     assert.deepEqual(await syncWatchtime(f.db, se.client, config, at(5)), { status: 'not_due' });
     assert.equal((await syncWatchtime(f.db, se.client, config, at(10))).status, 'ok');
-    assert.equal(await balanceOf(f.db, crew.id), 20n, '20 minutes = 2 × 10 VP');
+    assert.equal(await balanceOf(f.db, crew.id), 120n, 'then 20 minutes = 2 × 10 VP');
   } finally {
     await f.client.close();
   }
@@ -107,9 +109,13 @@ test('a viewer who logs in later this month receives their watch time since the 
     se.minutes.late_viewer = 160;
     const result = await syncWatchtime(f.db, se.client, config, at(10));
     assert.equal(result.status === 'ok' && result.credited, 1);
-    assert.equal(await balanceOf(f.db, late.id), 60n, '60 minutes this month');
-    const [entry] = await f.db.select().from(ledger).where(eq(ledger.userId, late.id));
-    assert.equal(entry.reason, 'Kijktijd deze maand vóór je eerste login');
+    // 60 minutes this month in full, plus the 100 minutes before the month mark as welcome.
+    assert.equal(await balanceOf(f.db, late.id), 160n);
+    const entries = await f.db.select().from(ledger).where(eq(ledger.userId, late.id));
+    assert.deepEqual(entries.map((e) => [e.type, e.amount]).sort(), [
+      ['watchtime', 60n],
+      ['welcome_bonus', 100n],
+    ]);
   } finally {
     await f.client.close();
   }

@@ -355,3 +355,60 @@ test('watch-time months follow Belgian midnight', () => {
   assert.equal(monthKey(new Date('2026-08-31T22:00:00Z')), '2026-09');
   assert.equal(monthKey(new Date('2026-10-31T23:30:00Z')), '2026-11');
 });
+
+test('the welcome bonus pays history once, capped, and never double-counts this month', async () => {
+  // First link: 10,000 s of history = 160 VP, under the cap.
+  let f = await fixture();
+  try {
+    await f.db.update(pointRules).set({ welcomeCap: 1000n });
+    const first = f.observation(10_000n, 'link');
+    assert.deepEqual(await creditWatchtime(f.db, first), {
+      status: 'baseline',
+      credited: 0n,
+      welcome: 160n,
+    });
+    assert.equal((await creditWatchtime(f.db, first)).status, 'duplicate');
+    await creditWatchtime(f.db, f.observation(10_600n));
+    const wallet = await balance(f.db, f.user.id);
+    assert.equal(wallet.balance, 170n, 'welcome once, then 10 VP per 600 s');
+    assert.equal(wallet.totalEarned, 170n);
+    const types = (await f.db.select().from(ledger)).map((e) => e.type).sort();
+    assert.deepEqual(types, ['watchtime', 'welcome_bonus']);
+  } finally {
+    await f.client.close();
+  }
+  // A long history is capped.
+  f = await fixture();
+  try {
+    await f.db.update(pointRules).set({ welcomeCap: 1000n });
+    await creditWatchtime(f.db, f.observation(1_000_000n));
+    assert.equal((await balance(f.db, f.user.id)).balance, 1000n);
+  } finally {
+    await f.client.close();
+  }
+  // Linked before the cap existed: granted on the next observation, from the original baseline.
+  f = await fixture();
+  try {
+    await creditWatchtime(f.db, f.observation(6_000n));
+    await f.db.update(pointRules).set({ welcomeCap: 1000n });
+    assert.deepEqual(await creditWatchtime(f.db, f.observation(6_600n)), {
+      status: 'ok',
+      credited: 10n,
+      welcome: 100n,
+    });
+    await creditWatchtime(f.db, f.observation(7_200n));
+    assert.equal((await balance(f.db, f.user.id)).balance, 120n, 'no second welcome');
+  } finally {
+    await f.client.close();
+  }
+  // New member with a month mark: this month in full, older history as the capped welcome.
+  f = await fixture();
+  try {
+    await f.db.update(pointRules).set({ welcomeCap: 1000n });
+    await recordMonthMark(f.db, mark(4000n, '2026-09-01T00:10:00Z'));
+    const result = await creditWatchtime(f.db, f.observation(7650n));
+    assert.deepEqual(result, { status: 'month_catch_up', credited: 60n, welcome: 60n });
+  } finally {
+    await f.client.close();
+  }
+});

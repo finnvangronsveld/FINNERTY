@@ -60,5 +60,8 @@ export function watchtimeConfiguration() {
     // First-install rate only; the versioned point rule in the database stays authoritative.
     pointsPerInterval: positiveInteger(process.env.POINTS_PER_INTERVAL, 10n),
     intervalSeconds: positiveInteger(process.env.POINTS_INTERVAL_SECONDS, 600n),
+    welcomeCap: /^(0|[1-9][0-9]{0,8})$/.test(process.env.WELCOME_BONUS_CAP?.trim() ?? '')
+      ? BigInt(process.env.WELCOME_BONUS_CAP!.trim())
+      : 1000n,
   };
 }

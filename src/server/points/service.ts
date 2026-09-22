@@ -100,7 +100,7 @@ export async function creditWatchtime(db: Database, input: Observation) {
         existing.observedAt.getTime() !== observation.observedAt.getTime()
       )
         throw new Error('IDEMPOTENCY_CONFLICT');
-      return { status: 'duplicate', credited: 0n };
+      return { status: 'duplicate', credited: 0n, welcome: 0n };
     }
     const [checkpoint] = await tx
       .select()
@@ -114,6 +114,7 @@ export async function creditWatchtime(db: Database, input: Observation) {
     if (!rule) throw new Error('MISSING_POINT_RULE');
     let status = 'ok';
     let credited = 0n;
+    let welcome = 0n;
     if (lockedIdentity.status !== 'verified') status = 'mapping_conflict';
     else if (lockedIdentity.epoch !== observation.epoch) status = 'epoch_conflict';
     else if (observation.seconds === null) status = 'missing';
@@ -171,7 +172,7 @@ export async function creditWatchtime(db: Database, input: Observation) {
           ruleVersion: rule.version,
           ...progress,
         });
-      if (credited > 0n) {
+      if (credited > 0n)
         await tx.insert(ledger).values({
           userId: identity.userId,
           type: 'watchtime',
@@ -181,11 +182,38 @@ export async function creditWatchtime(db: Database, input: Observation) {
           ruleVersion: rule.version,
           reason: status === 'month_catch_up' ? 'Kijktijd deze maand vóór je eerste login' : null,
         });
+      // One-time welcome bonus for watch time from before counting started (the checkpoint
+      // baseline), capped by the rule. Once per account, including accounts linked before the cap.
+      if (rule.welcomeCap > 0n) {
+        const key = `welcome:${identity.userId}`;
+        const [granted] = await tx
+          .select({ id: ledger.id })
+          .from(ledger)
+          .where(eq(ledger.idempotencyKey, key));
+        if (!granted) {
+          const before =
+            ((checkpoint ? checkpoint.baseline : from) / rule.intervalSeconds) * rule.points;
+          welcome = before < rule.welcomeCap ? before : rule.welcomeCap;
+          if (welcome > 0n)
+            await tx.insert(ledger).values({
+              userId: identity.userId,
+              type: 'welcome_bonus',
+              amount: welcome,
+              idempotencyKey: key,
+              sourceRef: identity.id,
+              ruleVersion: rule.version,
+              reason: `Kijktijd van vóór je koppeling (max. ${rule.welcomeCap} VP)`,
+            });
+        }
+      }
+      if (credited + welcome > 0n)
         await tx
           .update(wallets)
-          .set({ balance: wallet.balance + credited, totalEarned: wallet.totalEarned + credited })
+          .set({
+            balance: wallet.balance + credited + welcome,
+            totalEarned: wallet.totalEarned + credited + welcome,
+          })
           .where(eq(wallets.userId, identity.userId));
-      }
     }
     await tx.insert(snapshots).values({
       observationId: observation.id,
@@ -194,7 +222,7 @@ export async function creditWatchtime(db: Database, input: Observation) {
       observedAt: observation.observedAt,
       status,
     });
-    return { status, credited };
+    return { status, credited, welcome };
   });
 }
 

@@ -24,6 +24,8 @@ export interface WatchtimeSyncConfig {
   broadcasterId: string;
   pointsPerInterval: bigint;
   intervalSeconds: bigint;
+  /** First-install welcome bonus cap (VP) for watch time from before counting started. */
+  welcomeCap: bigint;
 }
 
 const channelSchema = z.object({
@@ -90,7 +92,7 @@ async function acquire(db: Database, now: Date) {
   return taken[0] ?? null;
 }
 
-/** First install: the owner's default rate (10 VP per 10 minutes) with this-month catch-up. */
+/** First install: the owner's defaults (10 VP per 10 minutes, this-month catch-up, capped welcome). */
 async function ensurePointRule(db: Database, config: WatchtimeSyncConfig) {
   await db
     .insert(pointRules)
@@ -99,6 +101,7 @@ async function ensurePointRule(db: Database, config: WatchtimeSyncConfig) {
       points: config.pointsPerInterval,
       intervalSeconds: config.intervalSeconds,
       historicalImport: 'current_month',
+      welcomeCap: config.welcomeCap,
     })
     .onConflictDoNothing();
 }
@@ -204,7 +207,7 @@ export async function syncWatchtime(
           observedAt: now,
           epoch: identity.epoch,
         });
-        if (result.credited > 0n) credited++;
+        if (result.credited + result.welcome > 0n) credited++;
       } catch {
         failed++;
       }

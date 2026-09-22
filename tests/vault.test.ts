@@ -306,6 +306,16 @@ test('leaderboards show opted-in accounts only; monthly counts net change since 
       ],
     );
     assert.deepEqual(month.viewer, { listed: false, rank: null, value: '9000' });
+    // A welcome bonus changes the balance but is not this month's activity.
+    await f.db.insert(ledger).values({
+      userId: second.id,
+      type: 'welcome_bonus',
+      amount: 5000n,
+      idempotencyKey: `welcome:${second.id}`,
+      sourceRef: 'test',
+    });
+    const afterWelcome = await leaderboard(f.db, 'month', second.id);
+    assert.equal(afterWelcome.viewer?.value, '400');
     assert.equal(month.since, monthStart().toISOString());
   } finally {
     await f.client.close();
