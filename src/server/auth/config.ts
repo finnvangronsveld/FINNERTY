@@ -1,7 +1,8 @@
 import 'server-only';
 import { isDemo } from '../config';
+import { appModeIsLive } from '../setup';
 export function authConfiguration() {
-  if (isDemo() || process.env.APP_MODE !== 'live') return null;
+  if (isDemo() || !appModeIsLive()) return null;
   const { APP_URL, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, AUTH_SECRET, DATABASE_URL } =
     process.env;
   if (!APP_URL || !TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET || !AUTH_SECRET || !DATABASE_URL)

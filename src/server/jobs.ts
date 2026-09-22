@@ -1,5 +1,6 @@
 import 'server-only';
 import { isDemo } from './config';
+import { appModeIsLive } from './setup';
 import { safeEqual } from './auth/crypto';
 import type { StreamCredentials } from './integrations/twitch-stream';
 export function authorizedJob(request: Request) {
@@ -11,7 +12,7 @@ export function authorizedJob(request: Request) {
   );
 }
 export function streamConfiguration(): StreamCredentials | null {
-  if (isDemo() || process.env.APP_MODE !== 'live') return null;
+  if (isDemo() || !appModeIsLive()) return null;
   const {
     TWITCH_CLIENT_ID,
     TWITCH_CLIENT_SECRET,
