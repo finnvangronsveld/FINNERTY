@@ -11,9 +11,17 @@ export function safeEqual(a: string, b: string) {
   const right = Buffer.from(b);
   return left.length === right.length && timingSafeEqual(left, right);
 }
+/** AUTH_SECRET is a 32-byte key written as base64 (44 chars) or hex (64 chars); both are unambiguous. */
+export function authKey(secret: string | undefined) {
+  const value = secret?.trim() ?? '';
+  const bytes = /^[0-9a-f]{64}$/i.test(value)
+    ? Buffer.from(value, 'hex')
+    : Buffer.from(value, 'base64');
+  return bytes.length === 32 ? bytes : null;
+}
 function key(secret: string) {
-  const bytes = Buffer.from(secret, 'base64');
-  if (bytes.length !== 32) throw new Error('INVALID_AUTH_SECRET');
+  const bytes = authKey(secret);
+  if (!bytes) throw new Error('INVALID_AUTH_SECRET');
   return bytes;
 }
 export function encrypt(value: string, secret: string, context: string) {

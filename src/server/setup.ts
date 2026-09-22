@@ -2,6 +2,8 @@
  * Production readiness per feature, as issue codes only. Never includes configured values,
  * so it is safe to expose on the public health route while setup is incomplete.
  */
+import { authKey } from './auth/crypto';
+
 type Env = Record<string, string | undefined>;
 
 export function appModeIsLive(env: Env = process.env) {
@@ -10,10 +12,7 @@ export function appModeIsLive(env: Env = process.env) {
 
 export function authSecretIssue(secret: string | undefined) {
   if (!secret?.trim()) return 'AUTH_SECRET_MISSING';
-  if (Buffer.from(secret, 'base64').length === 32) return null;
-  return /^[0-9a-f]{64}$/i.test(secret.trim())
-    ? 'AUTH_SECRET_IS_HEX_EXPECTED_BASE64'
-    : 'AUTH_SECRET_NOT_32_BYTES_BASE64';
+  return authKey(secret) ? null : 'AUTH_SECRET_NOT_32_BYTES';
 }
 
 export function setupReport(env: Env = process.env) {

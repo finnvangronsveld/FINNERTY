@@ -1,6 +1,7 @@
 import 'server-only';
 import { isDemo } from '../config';
 import { appModeIsLive } from '../setup';
+import { authKey } from './crypto';
 export function authConfiguration() {
   if (isDemo() || !appModeIsLive()) return null;
   const { APP_URL, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, AUTH_SECRET, DATABASE_URL } =
@@ -13,7 +14,7 @@ export function authConfiguration() {
     !(process.env.NODE_ENV !== 'production' && ['localhost', '127.0.0.1'].includes(app.hostname))
   )
     return null;
-  if (Buffer.from(AUTH_SECRET, 'base64').length !== 32) return null;
+  if (!authKey(AUTH_SECRET)) return null;
   return {
     clientId: TWITCH_CLIENT_ID,
     clientSecret: TWITCH_CLIENT_SECRET,

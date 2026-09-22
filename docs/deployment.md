@@ -71,7 +71,7 @@ Ga naar Project → Settings → Environment Variables. Voeg de volgende waarden
 | `TWITCH_CLIENT_SECRET` | Het Client Secret uit Twitch                                                                                                              |
 | `TWITCH_CHANNEL_LOGIN` | De kanaalnaam uit de Twitch-URL, in kleine letters                                                                                        |
 | `TWITCH_EMBED_PARENTS` | Alleen je websitehostname, bijvoorbeeld `jouw-project.vercel.app`; meerdere hostnamen kommagescheiden, zonder `https://`, pad of wildcard |
-| `AUTH_SECRET`          | Een nieuwe willekeurige sleutel: exact 32 bytes als base64                                                                                |
+| `AUTH_SECRET`          | Een nieuwe willekeurige sleutel: exact 32 bytes, als base64 (44 tekens) of hex (64 tekens)                                                |
 | `JOB_SECRET`           | Een afzonderlijk willekeurig geheim van minstens 32 tekens voor een externe scheduler                                                     |
 | `EVENTSUB_SECRET`      | Een afzonderlijk willekeurig geheim voor latere Twitch-webhookregistratie                                                                 |
 | `DISCORD_INVITE_URL`   | Je echte Discord-uitnodigingslink; optioneel                                                                                              |
