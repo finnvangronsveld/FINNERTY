@@ -7,7 +7,7 @@
 - Root-layout houdt één playerhost vast; alleen geometrie verandert bij navigatie. Op schermen waar 400 × 300 niet past een Twitch-link. Geen portals of dubbele player.
 - CSS voor beweging; geen animatiebibliotheek of WebGL nodig voor deze eerste compositie. Systeemvoorkeur en expliciete effectenschakelaar.
 - Gegenereerde decoratieve Frost Orbit-asset; alle tekst, navigatie en bediening in HTML. Geen concept-screenshot als website.
-- Eigen journaal en saldo. StreamElements uitsluitend read-only kijktijd. Eerste gevalideerde waarneming = basislijn, nooit automatische historische beloning.
+- Eigen journaal en saldo. StreamElements uitsluitend read-only kijktijd. Eerste gevalideerde waarneming = basislijn, nooit automatische historische beloning. _(Aangepast 2026-09-22: maandinhaal, zie onder.)_
 - Productie faalt gesloten bij ontbrekende configuratie; lokale demo expliciet herkenbaar en gescheiden.
 - ~~The Vault is permanent Under construction in deze versie.~~ Vervangen op 2026-09-22, zie onder.
 - OAuth via oauth4webapi met server-side identiteitscontrole; eigen intrekbare sessies en versleutelde tokens. Arctic bleek deprecated en is verwijderd vóór implementatie.
@@ -24,6 +24,8 @@
 - Sub-multiplier niet gebouwd: betaalde sub → meer inzetbare VP is een onrechtstreekse aankoop. Alleen cosmetische sub-perks zijn veilig.
 - Tempo wordt server-side afgedwongen onder de walletlock met de databaseklok, gelijk aan de animatieduur; plus 30 rondes/minuut, 10–5.000 VP per ronde en ~97% RTP.
 - Netto resultaat per ronde als één ledgerregel `game`; details in `game_rounds`. `total_earned` blijft kijktijd.
-- Maandleaderboard = netto ledgerwijziging sinds middernacht op de 1e in Europe/Brussels; totaal = huidig saldo. Beide opt-in.
+- Maandleaderboard = netto ledgerwijziging sinds middernacht op de 1e in Europe/Brussels; totaal = huidig saldo.
+- Leaderboards zijn opt-out (eigenaar, 2026-09-22): `users.listed` standaard `true`. Alleen de openbare Twitch-naam, avatar en punten; uitzetten met één klik in het account; vermeld op de privacypagina. Bestaande accounts niet overschreven.
+- Maandinhaal bij eerste login (eigenaar, 2026-09-22): `point_rules.historical_import = 'current_month'` (nieuwe standaard). De sync legt per kijker het laagste cumulatieve totaal per Belgische maand vast (`watchtime_month_marks`); de eerste waarneming van een nieuw account krediteert eenmalig het verschil, met reden in het journaal. Alleen kijktijd die de site zelf heeft waargenomen telt; vorige maanden niet. `off` blijft mogelijk per regelversie.
 
 Open: geverifieerde Twitch-login/ID, Discord-link, database-engine/inhoud, daadwerkelijke Vercel-koppeling en scheduler, echte StreamElements-response en eenheid, definitieve puntennaam en koers, eigenaar/contactgegevens voor privacy.

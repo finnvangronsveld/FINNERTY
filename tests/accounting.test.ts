@@ -14,7 +14,8 @@ import {
   ledger,
   snapshots,
 } from '../src/server/db/schema';
-import { creditWatchtime, correctBalance } from '../src/server/points/service';
+import { creditWatchtime, correctBalance, recordMonthMark } from '../src/server/points/service';
+import { monthKey } from '../src/server/month';
 import {
   collectWatchtime,
   normalizeUnverifiedStreamElementsResponse,
@@ -250,4 +251,63 @@ test('complete pagination includes page two, validates records and fails closed 
     () => normalizeUnverifiedStreamElementsResponse({ watchtime: 10, points: 5000 }),
     /CONTRACT_NOT_VERIFIED/,
   );
+});
+
+const mark = (seconds: bigint, observedAt: string) => ({
+  provider: 'fixture',
+  channelId: 'fixture-channel',
+  providerKey: 'fixture-id',
+  seconds,
+  observedAt: new Date(observedAt),
+});
+
+test('a first login credits this month since the month-start mark, exactly once', async () => {
+  const f = await fixture();
+  try {
+    // The sync saw this viewer before they had an account; the lowest value of the month wins.
+    await recordMonthMark(f.db, mark(4200n, '2026-09-01T06:00:00Z'));
+    await recordMonthMark(f.db, mark(4000n, '2026-09-01T00:10:00Z'));
+    await recordMonthMark(f.db, mark(4100n, '2026-09-01T03:00:00Z'));
+    const first = f.observation(7650n, 'first-login');
+    assert.equal((await creditWatchtime(f.db, first)).status, 'month_catch_up');
+    const wallet = await balance(f.db, f.user.id);
+    assert.equal(wallet.balance, 60n, '3650 s this month = 6 × 600 s');
+    assert.equal(wallet.totalEarned, 60n);
+    const [entry] = await f.db.select().from(ledger);
+    assert.equal(entry.reason, 'Kijktijd deze maand vóór je eerste login');
+    assert.equal((await creditWatchtime(f.db, first)).status, 'duplicate');
+    assert.equal((await balance(f.db, f.user.id)).balance, 60n);
+    // The 50 s remainder carries over like any other credit.
+    await creditWatchtime(f.db, f.observation(8200n));
+    assert.equal((await balance(f.db, f.user.id)).balance, 70n);
+    const [cp] = await f.db.select().from(checkpoints);
+    assert.equal(cp.baseline, 4000n);
+  } finally {
+    await f.client.close();
+  }
+});
+
+test('earlier months, a counter reset or the off policy only set a baseline', async () => {
+  for (const setup of ['last_month', 'counter_reset', 'policy_off'] as const) {
+    const f = await fixture();
+    try {
+      if (setup === 'last_month') await recordMonthMark(f.db, mark(1000n, '2026-08-31T20:00:00Z'));
+      if (setup === 'counter_reset')
+        await recordMonthMark(f.db, mark(90_000n, '2026-09-01T00:10:00Z'));
+      if (setup === 'policy_off') {
+        await recordMonthMark(f.db, mark(1000n, '2026-09-01T00:10:00Z'));
+        await f.db.update(pointRules).set({ historicalImport: 'off' });
+      }
+      assert.equal((await creditWatchtime(f.db, f.observation(7200n))).status, 'baseline', setup);
+      assert.equal((await balance(f.db, f.user.id)).balance, 0n, setup);
+    } finally {
+      await f.client.close();
+    }
+  }
+});
+
+test('watch-time months follow Belgian midnight', () => {
+  assert.equal(monthKey(new Date('2026-08-31T21:59:59Z')), '2026-08');
+  assert.equal(monthKey(new Date('2026-08-31T22:00:00Z')), '2026-09');
+  assert.equal(monthKey(new Date('2026-10-31T23:30:00Z')), '2026-11');
 });

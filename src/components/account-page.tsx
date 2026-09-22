@@ -248,7 +248,10 @@ export function AccountPage() {
                 />
                 <span>Toon mij in de leaderboards (totaal en maand)</span>
               </label>
-              <p>Alleen geregistreerde siteaccounts. Je kunt je voorkeur altijd wijzigen.</p>
+              <p>
+                Standaard aan: je Twitch-naam en avatar staan in de ranglijst. Zet het uit om
+                onzichtbaar te zijn; je punten blijven gewoon van jou.
+              </p>
               <Link className="text-link" href="/privacy">
                 Over je gegevens <ArrowRight size={14} />
               </Link>

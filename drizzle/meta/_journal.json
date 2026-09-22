@@ -36,6 +36,20 @@
       "when": 1790074400145,
       "tag": "0004_abandoned_piledriver",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790079862631,
+      "tag": "0005_icy_shocker",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790080023252,
+      "tag": "0006_violet_moondragon",
+      "breakpoints": true
     }
   ]
 }

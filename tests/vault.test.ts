@@ -8,7 +8,8 @@ import { eq, sql } from 'drizzle-orm';
 import { authAccounts, gameRounds, ledger, users, wallets } from '../src/server/db/schema';
 import { correctBalance } from '../src/server/points/service';
 import { prepareRound, type Rng } from '../src/server/vault/games';
-import { leaderboard, monthStart, playRound, VaultError } from '../src/server/vault/service';
+import { leaderboard, playRound, VaultError } from '../src/server/vault/service';
+import { monthStart } from '../src/server/month';
 import {
   DICE_CHANCE,
   ROULETTE_BET_TYPES,

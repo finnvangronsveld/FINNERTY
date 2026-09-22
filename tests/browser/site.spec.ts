@@ -29,7 +29,7 @@ test('responsive Frost Orbit routes without horizontal overflow', async ({ page 
     ).toBe(true);
   }
 });
-test('the Vault plays one paced round at a time and ranks opted-in players', async ({ page }) => {
+test('the Vault plays one paced round at a time and ranks visible players', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   // Expected 401/429 responses are logged by the browser; anything else (e.g. React key warnings) fails.
@@ -81,7 +81,8 @@ test('the Vault plays one paced round at a time and ranks opted-in players', asy
   });
   expect(forged.status()).toBe(403);
 
-  await page.getByRole('button', { name: 'Toon mij in het leaderboard' }).click();
+  // New accounts are listed by default; no opt-in click needed.
+  await expect(page.getByRole('button', { name: 'Toon mij in het leaderboard' })).toHaveCount(0);
   await expect(page.locator('.leaderboard-list li.you')).toContainText('Demo Crew Member');
   await page.getByRole('tab', { name: 'Deze maand' }).click();
   await expect(page.locator('.leaderboard-viewer')).toContainText(/#\d+|Nog geen stijging/);
@@ -111,11 +112,13 @@ test('demo account persists, uses paginated ledger, protects writes and revokes 
         !firstPage.entries.some((first: { id: string }) => first.id === entry.id),
     ),
   ).toBe(true);
-  await page.getByRole('checkbox').check();
+  // Visible on the leaderboards by default; opting out is saved and survives a reload.
   await expect(page.getByRole('checkbox')).toBeChecked();
+  await page.getByRole('checkbox').uncheck();
+  await expect(page.getByRole('checkbox')).not.toBeChecked();
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Demo Crew Member' })).toBeVisible();
-  await expect(page.getByRole('checkbox')).toBeChecked();
+  await expect(page.getByRole('checkbox')).not.toBeChecked();
   await page.screenshot({ path: 'docs/screenshots/account-1440.png', fullPage: true });
   const forbidden = await page.request.post('/api/auth/demo', {
     headers: { origin: 'https://evil.example' },

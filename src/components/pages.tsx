@@ -260,8 +260,8 @@ export function CommunityPage() {
         <p className="eyebrow">CREW LEADERBOARD</p>
         <h2>Een eigen plek in de universe.</h2>
         <p>
-          Vault Points uit kijktijd en The Vault. Alleen accounts die zelf kiezen om zichtbaar te
-          zijn staan erin.
+          Vault Points uit kijktijd en The Vault. Siteaccounts staan er standaard in en kunnen zich
+          altijd onzichtbaar maken in hun account.
         </p>
         <Leaderboard limit={25} />
         <Link href="/vault" className="text-link">
@@ -290,9 +290,11 @@ export function PrivacyPage() {
       </p>
       <h2>Je profiel en verwijderen</h2>
       <p>
-        Profielen zijn standaard niet opgenomen in een leaderboard. In je account kun je je voorkeur
-        wijzigen en een lokale demo-aanvraag voor verwijdering registreren. Deze aanvraag wordt
-        opgeslagen, maar verwijdert nog geen gegevens en verstuurt niets naar een externe partij.
+        Je Twitch-weergavenaam, avatar en puntenstand staan standaard in de leaderboards van The
+        Vault en de community. Dat zijn gegevens die je op Twitch al openbaar toont. In je account
+        zet je dat met één klik uit, en je kunt er een aanvraag voor verwijdering registreren. Deze
+        aanvraag wordt opgeslagen, maar verwijdert nog geen gegevens en verstuurt niets naar een
+        externe partij.
       </p>
       <h2>Externe diensten</h2>
       <p>

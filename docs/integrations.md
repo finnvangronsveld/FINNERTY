@@ -29,7 +29,9 @@ Documentatie gecontroleerd op 13 september 2026; geen echte credentials gebruikt
 6. Verifieer trackinggedrag bij Twitch zelf, embed met/zonder chat en mobiel volgens de [loyalty-uitleg](https://support.streamelements.com/hc/en-us/articles/10474478470290-Loyalty-System-The-Complete-Guide-Setup-Leaderboard-Points). Kijktijdregistratie is geen onafhankelijk bewijs van iedere bekeken seconde.
 7. Voeg centrale bounded syncjobs toe (start 5–10 minuten), met DB-leases, paginacursors, retries/backoff en mappingconflicten. Laat ook afwezige sitegebruikers inhalen.
 
-Tot dit bewezen is, zijn **alleen demo-credits mogelijk**. Er is geen extra rewardbron via player-heartbeats. Historische import blijft uit en heeft nog geen adminactie.
+Tot dit bewezen is, zijn **alleen demo-credits mogelijk**. Er is geen extra rewardbron via player-heartbeats.
+
+**Maandinhaal bij eerste login (beslist 2026-09-22).** StreamElements levert kijktijd alleen als cumulatief totaal, zonder maand- of periodefilter (gecontroleerd in de OpenAPI: `period` bestaat alleen voor activities en sessions). De syncworker moet daarom voor **elke** kijker op elke pagina `recordMonthMark` aanroepen, ook zonder siteaccount, met dezelfde `provider`/`channelId`/`providerKey` als de latere `external_identities`. `creditWatchtime` krediteert bij de eerste waarneming van een account eenmalig het verschil met dat maandijkpunt. Een maand telt pas volledig als de sync vanaf het begin van die maand draait; daarvóór is er geen ijkpunt en geen inhaal.
 
 ## Database en hosting
 

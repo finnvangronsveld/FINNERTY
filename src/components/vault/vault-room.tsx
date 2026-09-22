@@ -267,7 +267,10 @@ export function VaultPage() {
               Iedere ronde duurt even. Snel klikken, verversen of meerdere tabs versnellen niets.
               Minimaal 10, maximaal 5.000 {config.pointsSymbol} per ronde.
             </li>
-            <li>Het leaderboard toont je alleen als je dat zelf aanzet.</li>
+            <li>
+              Je staat standaard in het leaderboard met je Twitch-naam. Uitzetten kan altijd in je
+              account.
+            </li>
           </ul>
           <p className="rules-help">
             Echt gokken is iets anders. Vragen of zorgen over gokgedrag?{' '}

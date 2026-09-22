@@ -155,8 +155,8 @@ export function Leaderboard({
         ) : viewer && !viewer.listed ? (
           <>
             <p>
-              <Eye size={14} /> Je bent onzichtbaar. Je positie en naam worden pas getoond als je
-              dat zelf aanzet.
+              <Eye size={14} /> Je hebt jezelf onzichtbaar gemaakt. Je positie en naam worden pas
+              weer getoond als je dat aanzet.
             </p>
             <button
               type="button"

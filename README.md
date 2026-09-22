@@ -52,7 +52,7 @@ Kopieer `.env.example` naar `.env.local` en vul secrets alleen daar of in de sec
 
 ## Opleverstatus
 
-Fase A is lokaal gebouwd. Fase B heeft OAuth, sessies, tokenvalidatie/refresh, gedeelde streamcache, persistente playerhost en EventSub-code. Fase C heeft migraties, read-only transport, intern adaptercontract en geteste accounting. Fase D heeft profielvoorkeuren, verwijderingsregistratie en afgeschermd basisbeheer. Fase E heeft The Vault: vier spellen met servergestuurd tempo, rondejournaal en opt-in leaderboards. **Dit is nog geen afgeronde of gepubliceerde v1.**
+Fase A is lokaal gebouwd. Fase B heeft OAuth, sessies, tokenvalidatie/refresh, gedeelde streamcache, persistente playerhost en EventSub-code. Fase C heeft migraties, read-only transport, intern adaptercontract en geteste accounting. Fase D heeft profielvoorkeuren, verwijderingsregistratie en afgeschermd basisbeheer. Fase E heeft The Vault: vier spellen met servergestuurd tempo, rondejournaal en leaderboards (standaard zichtbaar, uit te zetten). **Dit is nog geen afgeronde of gepubliceerde v1.**
 
 Nog nodig: echte Twitch-smoketest, StreamElements-contractproef en mapping/syncworker, PostgreSQL-tests met onafhankelijke workers, beheer van mappingconflicten/regels, definitief verwijderings- en bewaarbeleid, scheduler/deployment, echte player-/autoplaytest en performance op een telefoon.
 

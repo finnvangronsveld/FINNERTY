@@ -5,6 +5,7 @@ import { gameRounds, ledger, users, wallets } from '../db/schema';
 import { GAME_DURATION_MS, GAME_IDS, type GameId } from '@/lib/vault';
 import type { LeaderboardPeriod, LeaderboardView, VaultRoundView } from '@/lib/contracts';
 import { prepareRound, secureRng, type Rng } from './games';
+import { monthStart } from '../month';
 
 export type VaultErrorCode =
   'INVALID_BET' | 'TOO_FAST' | 'INSUFFICIENT_BALANCE' | 'MISSING_WALLET' | 'IDEMPOTENCY_CONFLICT';
@@ -148,41 +149,9 @@ export async function recentRounds(db: Database, userId: string, limit = 8) {
   return rows.map(roundView);
 }
 
-/** Midnight on the first day of the current month in Belgium, as a UTC instant. */
-export function monthStart(now = new Date(), timeZone = 'Europe/Brussels') {
-  const parts = (date: Date) =>
-    Object.fromEntries(
-      new Intl.DateTimeFormat('en-GB', {
-        timeZone,
-        hourCycle: 'h23',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      })
-        .formatToParts(date)
-        .map((part) => [part.type, Number(part.value)]),
-    );
-  const local = parts(now);
-  const guess = Date.UTC(local.year, local.month - 1, 1);
-  const atGuess = parts(new Date(guess));
-  const offset =
-    Date.UTC(
-      atGuess.year,
-      atGuess.month - 1,
-      atGuess.day,
-      atGuess.hour,
-      atGuess.minute,
-      atGuess.second,
-    ) - guess;
-  return new Date(guess - offset);
-}
-
 const LEADERBOARD_SIZE = 25;
 /**
- * Opt-in only: accounts appear when `listed` is on and no deletion was requested.
+ * Accounts appear while `listed` is on (the default; members can turn it off) and no deletion was requested.
  * All-time ranks the current balance; monthly ranks the net VP change since the first of the month.
  */
 export async function leaderboard(

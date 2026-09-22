@@ -12,7 +12,7 @@ De actuele gebruikersopdracht en volledige masterprompt zijn gelezen. De tekst i
 | `/stream`    | Uitgebreide playerzone of eerlijke offline/onbekend-state, accountstrook       |
 | `/vault`     | Gameroom: saldo, vier spellen, leaderboard totaal/maand, rondes, huisregels    |
 | `/account`   | Identiteit, kijktijd, saldo/totaal verdiend, pagineerbaar journaal en voorkeur |
-| `/community` | Discord-link en opt-in leaderboard (top 25); geen verzonnen aantallen          |
+| `/community` | Discord-link en leaderboard (top 25, opt-out); geen verzonnen aantallen        |
 | `/privacy`   | Eerlijke conceptbeschrijving en expliciete ontbrekende publicatiegegevens      |
 | `/admin`     | Alleen geverifieerde Twitch-ID’s uit serverconfiguratie; geen demo-admin       |
 
@@ -20,7 +20,7 @@ De actuele gebruikersopdracht en volledige masterprompt zijn gelezen. De tekst i
 
 Voorlopige naam: Vault Points / VP. Serverconfiguratie bepaalt labels. De demo gebruikt regelversie 1: 10 VP per 600 nieuwe geregistreerde seconden. Dit is geen vastgestelde kanaaleconomie. De koers in de database is leidend; productie begint zonder regel of mapping en kan daardoor geen ongecontroleerde toekenning doen.
 
-- De eerste geldige cumulatieve waarneming vormt de basislijn; historische tijd blijft zichtbaar.
+- Eerste login, beleid `current_month` (standaard): de eerste geldige waarneming krediteert eenmalig de kijktijd sinds het maandbegin-ijkpunt van die kijker (Belgische kalendermaand). Oudere maanden blijven basislijn. Zonder ijkpunt of met beleid `off` is de eerste waarneming alleen basislijn.
 - Alleen positieve gevalideerde delta’s onder dezelfde geverifieerde identiteit en hetzelfde brontijdperk tellen mee.
 - Resterende seconden worden bewaard. Lagere tellers, ontbrekende records en mappingconflicten geven geen reset of beloning.
 - Koerswijzigingen vragen expliciete checkpointmigratie; tot die tijd pauzeert toekenning.
@@ -35,4 +35,4 @@ Mobiel <432 px of een zeer lage viewport: livebalk met Twitch-link. Dit is de ex
 
 ## Open productkeuzes
 
-Echte kanaalidentiteit, Discord-link, definitieve puntennaam/koers, historische importbeleid, bewaartermijnen, contactgegevens eigenaar. Het leaderboard toont alleen accounts die zichtbaarheid zelf aanzetten.
+Echte kanaalidentiteit, Discord-link, definitieve puntennaam/koers, bewaartermijnen, contactgegevens eigenaar. Siteaccounts staan standaard in het leaderboard (alleen Twitch-naam, avatar en punten) en kunnen dat in hun account uitzetten.

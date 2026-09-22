@@ -35,7 +35,7 @@ In de interface blijft de knop uitgeschakeld en vult hij zich precies zo lang al
 - `src/lib/vault.ts` — gedeelde spelregels, multipliers (basispunten, integer VP) en tempo. UI en server gebruiken exact dezelfde getallen.
 - `src/server/vault/games.ts` — Zod-validatie per spel en afhandeling met `crypto.randomInt` (CSPRNG). De RNG is injecteerbaar zodat tests de exacte RTP over alle uitkomsten berekenen.
 - `src/server/vault/service.ts` — één transactie per ronde: tempo, saldo, uitkomst, `game_rounds`-record, één `ledger_entries`-regel van type `game` met het **netto** resultaat, walletupdate. Idempotent per client-UUID; dezelfde sleutel met een andere inzet geeft `IDEMPOTENCY_CONFLICT`. `total_earned` blijft uitsluitend kijktijd, zodat `/api/admin/health` blijft reconciliëren.
-- Leaderboards tonen alleen accounts met `listed = true` zonder verwijderingsverzoek (opt-in, AVG). Gelijke waarden delen een rang.
+- Leaderboards tonen accounts met `listed = true` zonder verwijderingsverzoek. `listed` staat standaard aan (opt-out): alleen de openbare Twitch-naam, avatar en punten, uitzetten met één klik, vermeld op de privacypagina. Gelijke waarden delen een rang.
 - API: `POST /api/vault/play`, `GET /api/vault/rounds`, `GET /api/vault/leaderboard?period=all|month`. Alles private/no-store; mutaties vereisen same-origin en sessie.
 - Migratie `drizzle/0004_abandoned_piledriver.sql`: tabel `game_rounds`, ledgertype `game`, indexen voor ranglijst en historie.
 

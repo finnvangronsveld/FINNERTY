@@ -1,11 +1,13 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../db/types';
+import { monthKey } from '../month';
 import {
   auditLogs,
   checkpoints,
   externalIdentities,
   ledger,
+  monthMarks,
   pointRules,
   snapshots,
   wallets,
@@ -21,6 +23,34 @@ export const observationSchema = z
   })
   .strict();
 export type Observation = z.infer<typeof observationSchema>;
+
+export const monthMarkSchema = z
+  .object({
+    provider: z.string().min(1).max(40),
+    channelId: z.string().min(1).max(120),
+    providerKey: z.string().min(1).max(180),
+    seconds: z.bigint().min(0n).max(9223372036854775807n),
+    observedAt: z.date(),
+  })
+  .strict();
+
+/**
+ * Keeps the lowest cumulative watch time seen for a viewer in each Belgian month. The sync calls
+ * this for every viewer on every page, including viewers without a site account yet.
+ */
+export async function recordMonthMark(db: Database, input: z.infer<typeof monthMarkSchema>) {
+  const mark = monthMarkSchema.parse(input);
+  await db
+    .insert(monthMarks)
+    .values({ ...mark, month: monthKey(mark.observedAt) })
+    .onConflictDoUpdate({
+      target: [monthMarks.provider, monthMarks.channelId, monthMarks.providerKey, monthMarks.month],
+      set: {
+        seconds: sql`LEAST(${monthMarks.seconds}, excluded.seconds)`,
+        observedAt: sql`LEAST(${monthMarks.observedAt}, excluded.observed_at)`,
+      },
+    });
+}
 
 /** Only consumes verified, normalized observations. Never receives raw provider data. */
 export async function creditWatchtime(db: Database, input: Observation) {
@@ -80,56 +110,74 @@ export async function creditWatchtime(db: Database, input: Observation) {
     else if (checkpoint && observation.seconds < checkpoint.highWater) status = 'counter_decreased';
     else if (checkpoint && observation.observedAt < checkpoint.lastSuccessfulSyncAt)
       status = 'out_of_order';
-    else if (!checkpoint) {
-      status = 'baseline';
-      await tx
-        .insert(checkpoints)
-        .values({
+    else {
+      let from = checkpoint ? checkpoint.highWater - checkpoint.remainder : observation.seconds!;
+      if (!checkpoint) {
+        // First verified observation for this account. With the current_month policy, watch time
+        // since the viewer's month-start mark is credited once; otherwise it only sets the baseline.
+        status = 'baseline';
+        if (rule.historicalImport === 'current_month') {
+          const [mark] = await tx
+            .select()
+            .from(monthMarks)
+            .where(
+              and(
+                eq(monthMarks.provider, identity.provider),
+                eq(monthMarks.channelId, identity.channelId),
+                eq(monthMarks.providerKey, identity.providerKey),
+                eq(monthMarks.month, monthKey(observation.observedAt)),
+              ),
+            );
+          if (
+            mark &&
+            mark.seconds < observation.seconds! &&
+            mark.observedAt <= observation.observedAt
+          ) {
+            from = mark.seconds;
+            status = 'month_catch_up';
+          }
+        }
+      }
+      const uncreditedSeconds = observation.seconds! - from;
+      credited = (uncreditedSeconds / rule.intervalSeconds) * rule.points;
+      const progress = {
+        highWater: observation.seconds!,
+        remainder: uncreditedSeconds % rule.intervalSeconds,
+        lastSuccessfulSyncAt: observation.observedAt,
+      };
+      if (checkpoint)
+        await tx.update(checkpoints).set(progress).where(eq(checkpoints.identityId, identity.id));
+      else
+        await tx.insert(checkpoints).values({
           identityId: identity.id,
-          baseline: observation.seconds!,
-          highWater: observation.seconds!,
-          remainder: 0n,
+          baseline: from,
           epoch: observation.epoch,
           ruleVersion: rule.version,
-          lastSuccessfulSyncAt: observation.observedAt,
+          ...progress,
         });
-    } else {
-      const uncreditedSeconds = observation.seconds! - checkpoint.highWater + checkpoint.remainder;
-      credited = (uncreditedSeconds / rule.intervalSeconds) * rule.points;
-      await tx
-        .update(checkpoints)
-        .set({
-          highWater: observation.seconds!,
-          remainder: uncreditedSeconds % rule.intervalSeconds,
-          lastSuccessfulSyncAt: observation.observedAt,
-        })
-        .where(eq(checkpoints.identityId, identity.id));
       if (credited > 0n) {
-        await tx
-          .insert(ledger)
-          .values({
-            userId: identity.userId,
-            type: 'watchtime',
-            amount: credited,
-            idempotencyKey: `watchtime:${observation.id}`,
-            sourceRef: observation.id,
-            ruleVersion: rule.version,
-          });
+        await tx.insert(ledger).values({
+          userId: identity.userId,
+          type: 'watchtime',
+          amount: credited,
+          idempotencyKey: `watchtime:${observation.id}`,
+          sourceRef: observation.id,
+          ruleVersion: rule.version,
+          reason: status === 'month_catch_up' ? 'Kijktijd deze maand vóór je eerste login' : null,
+        });
         await tx
           .update(wallets)
           .set({ balance: wallet.balance + credited, totalEarned: wallet.totalEarned + credited })
           .where(eq(wallets.userId, identity.userId));
       }
     }
-    await tx
-      .insert(snapshots)
-      .values({
-        observationId: observation.id,
-        identityId: identity.id,
-        seconds: observation.seconds,
-        observedAt: observation.observedAt,
-        status,
-      });
+    await tx.insert(snapshots).values({
+      observationId: observation.id,
+      identityId: identity.id,
+      seconds: observation.seconds,
+      observedAt: observation.observedAt,
+      status,
+    });
     return { status, credited };
   });
 }
@@ -187,14 +235,12 @@ export async function correctBalance(
       .update(wallets)
       .set({ balance: wallet.balance + input.amount })
       .where(eq(wallets.userId, input.userId));
-    await tx
-      .insert(auditLogs)
-      .values({
-        actorId: input.actorId,
-        subjectId: input.userId,
-        action: 'points_correction',
-        reason: input.reason,
-        reference: entry.id,
-      });
+    await tx.insert(auditLogs).values({
+      actorId: input.actorId,
+      subjectId: input.userId,
+      action: 'points_correction',
+      reason: input.reason,
+      reference: entry.id,
+    });
   });
 }

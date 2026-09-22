@@ -10,6 +10,7 @@ import {
   jsonb,
   check,
   index,
+  primaryKey,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
@@ -18,7 +19,8 @@ export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   displayName: text('display_name').notNull(),
   avatarUrl: text('avatar_url'),
-  listed: boolean('listed').notNull().default(false),
+  /** Shown on the leaderboards unless the member turns it off (their public Twitch name only). */
+  listed: boolean('listed').notNull().default(true),
   createdAt: time('created_at'),
   deletionRequestedAt: timestamp('deletion_requested_at', { withTimezone: true }),
 });
@@ -69,11 +71,12 @@ export const pointRules = pgTable(
     intervalSeconds: bigint('interval_seconds', { mode: 'bigint' }).notNull(),
     points: bigint('points', { mode: 'bigint' }).notNull(),
     effectiveAt: time('effective_at'),
-    historicalImport: text('historical_import').notNull().default('off'),
+    /** 'current_month': the first verified observation also credits watch time since the viewer's month-start mark. */
+    historicalImport: text('historical_import').notNull().default('current_month'),
   },
   (t) => [
     check('positive_point_rule', sql`${t.intervalSeconds} > 0 AND ${t.points} > 0`),
-    check('no_implicit_import', sql`${t.historicalImport} = 'off'`),
+    check('historical_import_policy', sql`${t.historicalImport} IN ('off', 'current_month')`),
   ],
 );
 export const externalIdentities = pgTable(
@@ -116,6 +119,25 @@ export const checkpoints = pgTable(
       'checkpoint_values',
       sql`${t.baseline} >= 0 AND ${t.highWater} >= ${t.baseline} AND ${t.remainder} >= 0`,
     ),
+  ],
+);
+/**
+ * Lowest cumulative watch time seen per provider viewer per Belgian calendar month, recorded for
+ * every viewer the sync sees, with or without a site account. It lets a first login credit this month.
+ */
+export const monthMarks = pgTable(
+  'watchtime_month_marks',
+  {
+    provider: text('provider').notNull(),
+    channelId: text('channel_id').notNull(),
+    providerKey: text('provider_key').notNull(),
+    month: text('month').notNull(),
+    seconds: bigint('seconds', { mode: 'bigint' }).notNull(),
+    observedAt: timestamp('observed_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.provider, t.channelId, t.providerKey, t.month] }),
+    check('month_mark_values', sql`${t.seconds} >= 0 AND ${t.month} ~ '^[0-9]{4}-[0-9]{2}$'`),
   ],
 );
 export const snapshots = pgTable('watchtime_snapshots', {
