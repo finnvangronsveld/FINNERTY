@@ -1,4 +1,6 @@
-# Finnertyverse — Frost Orbit
+# Finnerty
+
+Nieuw ontwerp: warm charcoal, crème en vermiljoen, met een typografische homepage en eigen CSS/SVG-spelillustraties. Zie [het redesign](docs/design-redesign-2026-09-23.md) en de [oorspronkelijke designaudit](docs/design-audit-2026-09-22.md).
 
 Een werkende lokale websitebasis voor Finnerty. Eigen Vault Points staan in een PostgreSQL-journaal; StreamElements levert uitsluitend kijktijd. **The Vault** is de gameroom: Coinflip, Dice, Orbit Slots en roulette met gratis VP, plus leaderboards (totaal en maand). Geen koop-, transfer-, prijs- of uitbetalingsfunctionaliteit; zie [The Vault](docs/vault.md) voor het juridische kader onder de Kansspelwet.
 

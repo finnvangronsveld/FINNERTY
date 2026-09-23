@@ -1,4 +1,10 @@
-# Frost Orbit-asset
+# Visuele assets
+
+Het actieve ontwerp gebruikt de lokale vectoren en CSS in `src/components/game-art.tsx`, de spelobjecten in `src/components/vault/games.tsx` en het F-favicon. Hiervoor worden geen rasterillustraties geladen. Fonts zijn zelf gehost: Manrope en Space Grotesk. Lucide verzorgt interface-iconen.
+
+## Archief: voormalig Frost Orbit-asset
+
+De onderstaande assets blijven als archief aanwezig, maar worden door het nieuwe ontwerp niet gebruikt.
 
 Primair referentiebeeld: `references/07-frost-orbit.png`, gelezen uit het aangeleverde startpakket. Alleen visuele richting; de verouderde spelpresentatie is niet overgenomen.
 

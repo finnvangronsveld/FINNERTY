@@ -7,8 +7,8 @@ import { SiteProvider } from '@/components/site-provider';
 import { SiteShell } from '@/components/site-shell';
 import { publicConfig } from '@/server/config';
 export const metadata: Metadata = {
-  title: { default: 'Finnertyverse — Your crew. Your universe.', template: '%s · Finnertyverse' },
-  description: 'De stream. De chaos. Jouw plek in de crew.',
+  title: { default: 'Finnerty — Hier blijf je hangen.', template: '%s · Finnerty' },
+  description: 'Kijk mee met Finnerty, speel in The Vault en blijf hangen bij de crew.',
   robots: { index: false, follow: false },
 };
 export const dynamic = 'force-dynamic';

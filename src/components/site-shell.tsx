@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, ChevronDown, Sparkles, Radio as Twitch, X } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, SlidersHorizontal, X } from 'lucide-react';
 import { copy } from '@/lib/copy';
 import { useSite } from './site-provider';
 import { PersistentPlayer } from './stream-player';
@@ -11,7 +11,9 @@ export function LoginButton({ label }: { label?: string }) {
   const { login, busy, config } = useSite();
   return (
     <button className="button login-button" onClick={() => void login()} disabled={busy}>
-      <Twitch size={16} />
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M4 2 1 6v16h6v2l4-2h5l7-7V2H4Zm17 12-4 4h-5l-3 3v-3H5V4h16v10ZM10 7h2v6h-2V7Zm6 0h2v6h-2V7Z" />
+      </svg>
       {busy ? 'Even verbinden…' : label || (config.demo ? 'Demo-account' : 'Login met Twitch')}
     </button>
   );
@@ -74,7 +76,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       </a>
       <header className="site-header">
         <Link href="/" className="wordmark" aria-label="Finnerty home">
-          <span className="brand-mark">F</span>FINNERTY
+          finnerty<span>.</span>
         </Link>
         <nav aria-label="Hoofdnavigatie">
           {copy.navigation.map((item) => (
@@ -116,15 +118,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <PersistentPlayer />
       <footer className="site-footer">
         <Link className="footer-brand" href="/">
-          FINNERTY
+          finnerty.
         </Link>
-        <span className="footer-line" />
-        <span className="footer-tagline">STREAM. CONNECT. BELONG.</span>
+        <span className="footer-tagline">GOED DAT JE ER BENT.</span>
         <div className="footer-links">
           <Link href="/privacy">Privacy</Link>
           <Link href="/account">Mijn account</Link>
           <button className="effects-toggle" onClick={toggleEffects} aria-pressed={!effects}>
-            <Sparkles size={13} />
+            <SlidersHorizontal size={14} />
             {effects ? 'Effecten beperken' : 'Effecten beperkt'}
           </button>
         </div>

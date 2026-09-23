@@ -1,6 +1,6 @@
 'use client';
 import { useRef, useState, type CSSProperties } from 'react';
-import { Orbit, RotateCcw, Trash2 } from 'lucide-react';
+import { Asterisk, RotateCcw, Trash2 } from 'lucide-react';
 import {
   COIN_LABEL,
   COINFLIP_MULTIPLIER_BP,
@@ -129,7 +129,7 @@ export function CoinflipGame({ balance, playing, animate, symbol, play }: GamePr
               <span>F</span>
             </div>
             <div className="coin-face tails">
-              <Orbit size={64} strokeWidth={1.3} />
+              <Asterisk size={64} strokeWidth={2} />
             </div>
           </div>
         </div>
@@ -157,7 +157,7 @@ export function CoinflipGame({ balance, playing, animate, symbol, play }: GamePr
               disabled={playing}
               onClick={() => setSide(value)}
             >
-              {value === 'heads' ? <span className="mini-f">F</span> : <Orbit size={16} />}
+              {value === 'heads' ? <span className="mini-f">F</span> : <Asterisk size={16} />}
               {COIN_LABEL[value]}
             </button>
           ))}
@@ -282,7 +282,7 @@ export function DiceGame({ balance, playing, animate, symbol, play }: GameProps)
         revealed={revealed}
         playing={playing}
         waiting="De dobbelsteen rolt…"
-        idle={`Win als de rol ${direction === 'under' ? 'lager is dan' : 'minstens'} ${threshold},00 is.`}
+        idle={`Win als de rol ${direction === 'under' ? 'lager dan' : 'minstens'} ${threshold},00 is.`}
         symbol={symbol}
       >
         {round && `Rol ${rollLabel((round.outcome as { roll: number }).roll)}. `}
@@ -559,17 +559,17 @@ function Wheel() {
     <svg viewBox="-150 -150 300 300" className="wheel-svg" aria-hidden="true">
       <defs>
         <radialGradient id="wheel-cone" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stopColor="#23445e" />
-          <stop offset="70%" stopColor="#0a1828" />
-          <stop offset="100%" stopColor="#050c16" />
+          <stop offset="0%" stopColor="#45483c" />
+          <stop offset="70%" stopColor="#24271f" />
+          <stop offset="100%" stopColor="#191b16" />
         </radialGradient>
         <linearGradient id="wheel-rim" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#dff6ff" />
-          <stop offset="50%" stopColor="#5d86a3" />
-          <stop offset="100%" stopColor="#c8e9ff" />
+          <stop offset="0%" stopColor="#e8e4d8" />
+          <stop offset="50%" stopColor="#92957e" />
+          <stop offset="100%" stopColor="#d6d2c3" />
         </linearGradient>
       </defs>
-      <circle r="148" fill="#061220" stroke="url(#wheel-rim)" strokeWidth="3" />
+      <circle r="148" fill="#161813" stroke="url(#wheel-rim)" strokeWidth="3" />
       {ROULETTE_WHEEL.map((n, index) => {
         const start = index * SEGMENT - SEGMENT / 2;
         const end = start + SEGMENT;
@@ -588,7 +588,7 @@ function Wheel() {
           </g>
         );
       })}
-      <circle r={inner} fill="url(#wheel-cone)" stroke="#8fc9ec55" strokeWidth="1" />
+      <circle r={inner} fill="url(#wheel-cone)" stroke="#e8e4d855" strokeWidth="1" />
       {Array.from({ length: 8 }, (_, index) => (
         <line
           key={index}
@@ -597,7 +597,7 @@ function Wheel() {
           x2="0"
           y2="-92"
           transform={`rotate(${index * 45})`}
-          stroke="#9fd8f733"
+          stroke="#e8e4d833"
           strokeWidth="1.5"
         />
       ))}

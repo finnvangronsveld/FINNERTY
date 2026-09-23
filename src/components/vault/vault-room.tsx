@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { Ban, Clock3, Gauge, HeartHandshake, ShieldCheck, Trophy } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Coins, HeartHandshake, ShieldCheck } from 'lucide-react';
 import {
   COIN_LABEL,
   GAME_DURATION_MS,
@@ -14,7 +14,6 @@ import {
   type SlotSymbol,
 } from '@/lib/vault';
 import type { VaultRoundView } from '@/lib/contracts';
-import { OrbitArt } from '../orbit-art';
 import { useSite } from '../site-provider';
 import { LoginButton } from '../site-shell';
 import { CoinflipGame, DiceGame, RouletteGame, SlotsGame } from './games';
@@ -22,9 +21,16 @@ import { Leaderboard } from './leaderboard';
 import { GameIcon, Net, SlotIcon, useAnimate, useCountUp } from './shared';
 
 export function VaultPage() {
+  const searchParams = useSearchParams();
+  const requestedGame = searchParams.get('game');
+  const initialGame = GAME_IDS.find((id) => id === requestedGame) ?? 'coinflip';
+  return <VaultRoom key={initialGame} initialGame={initialGame} />;
+}
+
+function VaultRoom({ initialGame }: { initialGame: GameId }) {
   const { account, config, setBalance, refreshAccount } = useSite();
   const animate = useAnimate();
-  const [game, setGame] = useState<GameId>('coinflip');
+  const [game, setGame] = useState<GameId>(initialGame);
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState('');
   const [rounds, setRounds] = useState<VaultRoundView[]>([]);
@@ -114,19 +120,12 @@ export function VaultPage() {
   return (
     <div className="vault-room">
       <section className="vault-hero content-width">
-        <OrbitArt className="vault-hero-art" />
         <div className="vault-hero-copy">
-          <Link href="/" className="breadcrumb">
-            FINNERTYVERSE <span>/</span> THE VAULT
-          </Link>
-          <p className="eyebrow">THE VAULT / GAMEROOM</p>
+          <p className="eyebrow">DE GAMEROOM</p>
           <h1>
-            THE <span>VAULT.</span>
+            The Vault<span>.</span>
           </h1>
-          <p>
-            Speel met de {config.pointsName} die je verdient door mee te kijken. Geen echt geld,
-            geen prijzen. Alleen eer en een plek op het leaderboard.
-          </p>
+          <p>Vier spellen. Jouw {config.pointsName}. Alleen voor de eer.</p>
         </div>
         <div className="vault-wallet glass" aria-live="polite">
           {account ? (
@@ -142,27 +141,17 @@ export function VaultPage() {
           ) : (
             <>
               <span>Klaar om te spelen?</span>
-              <p>Log in met Twitch. Je punten komen van je kijktijd.</p>
               <LoginButton />
             </>
           )}
         </div>
       </section>
 
-      <ul className="vault-pledges content-width" aria-label="Zo werkt The Vault">
-        <li>
-          <Clock3 size={15} /> Punten verdien je alleen door te kijken
-        </li>
-        <li>
-          <Ban size={15} /> Niet te koop, niet in te wisselen, niet over te dragen
-        </li>
-        <li>
-          <Trophy size={15} /> Winnen levert eer op, geen prijzen
-        </li>
-        <li>
-          <Gauge size={15} /> Elke ronde neemt de tijd. Spammen versnelt niets
-        </li>
-      </ul>
+      <div className="vault-pledges content-width">
+        <Coins size={16} />
+        <p>Punten uit kijktijd. Geen echt geld of prijzen.</p>
+        <a href="#huisregels">Zo werkt het</a>
+      </div>
 
       <div className="vault-layout content-width">
         <div className="vault-main">
@@ -184,7 +173,6 @@ export function VaultPage() {
               >
                 <GameIcon game={id} size={19} />
                 <span>{GAME_INFO[id].name}</span>
-                <small>RTP {GAME_INFO[id].rtp}</small>
               </button>
             ))}
           </div>
@@ -250,7 +238,7 @@ export function VaultPage() {
             </p>
           )}
         </section>
-        <section className="house-rules glass">
+        <section className="house-rules glass" id="huisregels">
           <HeartHandshake size={22} />
           <h2>Huisregels</h2>
           <ul>

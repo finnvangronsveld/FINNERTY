@@ -1,187 +1,213 @@
 'use client';
 import Link from 'next/link';
 import {
-  ArrowDown,
   ArrowRight,
   ArrowUpRight,
-  CircleHelp,
   Clock3,
-  Fingerprint,
-  Gamepad2,
+  Coins,
   MessageCircle,
-  Orbit,
   Play,
+  Radio,
   ShieldCheck,
-  Radio as Twitch,
+  UserRound,
 } from 'lucide-react';
-import { copy } from '@/lib/copy';
-import { OrbitArt } from './orbit-art';
+import { GAME_IDS, GAME_INFO } from '@/lib/vault';
 import { useSite } from './site-provider';
 import { LoginButton, StreamStatus } from './site-shell';
 import { PlayerAnchor } from './stream-player';
 import { Leaderboard } from './vault/leaderboard';
+import { GameArt, VaultPoster } from './game-art';
+
 export function HomePage() {
-  const { stream } = useSite();
+  const { stream, config } = useSite();
   return (
     <div className="home-page">
-      <section className="hero">
-        <OrbitArt />
+      <section className="hero content-width">
         <div className="hero-content">
           <p className="eyebrow">
-            <span /> {copy.hero.eyebrow}
+            <span className="little-cross">✳</span> FINNERTY. AANGENAAM.
           </p>
           <h1>
-            {copy.hero.line1}
+            Hier blijf
             <br />
-            <span>{copy.hero.line2}</span>
+            je hangen<span className="accent-dot">.</span>
           </h1>
-          <p className="hero-description">{copy.hero.description}</p>
+          <p className="hero-description">
+            Voor de stream. Voor een potje. Of gewoon voor de gezelligheid. Schuif aan.
+          </p>
           <div className="hero-actions">
             <Link className="button primary" href="/stream">
-              <Play size={16} fill="currentColor" />
-              {copy.hero.action}
-              <ArrowUpRight size={16} />
+              <Play size={17} fill="currentColor" />
+              {stream.status === 'live' ? 'Kijk live mee' : 'Naar de stream'}
+              <ArrowUpRight size={18} />
             </Link>
-            <Link className="button ghost" href="/vault">
-              Explore The Vault <ArrowRight size={17} />
+            <Link className="text-link" href="/community">
+              Ontmoet de crew <ArrowRight size={17} />
             </Link>
           </div>
           <div className="hero-status">
             <StreamStatus />
             <span>
-              {stream.status === 'offline'
-                ? 'Even offline. Altijd jouw universe.'
-                : stream.status === 'live'
-                  ? 'Schuif aan bij de crew.'
-                  : 'De livestatus is nog niet beschikbaar.'}
+              {stream.status === 'live'
+                ? 'Pak een stoel. We zijn begonnen.'
+                : stream.status === 'offline'
+                  ? 'Even offline. De crew blijft hangen.'
+                  : 'Je vindt Finnerty ook op Twitch.'}
             </span>
           </div>
         </div>
-        <div className="hero-coordinate" aria-hidden="true">
-          F / 01 <span>THE ORBIT IS YOURS</span>
-        </div>
+        <Link href="/vault" className="vault-poster" aria-label="Open The Vault">
+          <div className="poster-top">
+            <span>DE GAMEROOM</span>
+            <span>01 — 04</span>
+          </div>
+          <h2>
+            THE VAULT<span>✳</span>
+          </h2>
+          <VaultPoster />
+          <div className="poster-bottom">
+            <span>
+              Jouw punten. Jouw potje.<small>Vier spellen. Geen echt geld.</small>
+            </span>
+            <span className="round-arrow">
+              <ArrowUpRight size={24} />
+            </span>
+          </div>
+        </Link>
       </section>
       {stream.status === 'live' && (
         <section className="home-stream content-width">
           <div className="section-caption">
-            <p className="eyebrow">LIVE FROM THE FINNERTYVERSE</p>
-            <Link href="/stream">
-              Naar de stream <ArrowUpRight size={16} />
+            <h2>We zijn live.</h2>
+            <Link className="text-link" href="/stream">
+              Open de stream <ArrowUpRight size={18} />
             </Link>
           </div>
           <PlayerAnchor />
         </section>
       )}
-      <div className="section-divider content-width">
-        <span>EXPLORE YOUR UNIVERSE</span>
-        <div />
-        <ArrowDown size={15} />
-      </div>
-      <section className="feature-grid content-width" aria-label="Ontdek Finnertyverse">
-        <article className="feature-card vault-card">
-          <div className="card-top">
-            <span className="eyebrow">01 / THE VAULT</span>
-            <span className="construction-badge open">
-              <Gamepad2 size={11} /> NOW OPEN
-            </span>
+      <section className="games-section content-width" aria-labelledby="home-games-title">
+        <div className="section-caption">
+          <div>
+            <p className="eyebrow">THE VAULT</p>
+            <h2 id="home-games-title">Wat spelen we?</h2>
           </div>
-          <h2>
-            The gameroom.
-            <br />
-            <span>Play for glory.</span>
-          </h2>
-          <p>{copy.vault.description}</p>
-          <div className="vault-emblem" aria-hidden="true">
-            <div className="orbit-ring ring-one" />
-            <div className="orbit-ring ring-two" />
-            <div className="chrome-f">F</div>
-            <span className="emblem-spark" />
-          </div>
-          <Link href="/vault" className="button outline">
-            Open The Vault <ArrowUpRight size={16} />
+          <Link className="text-link" href="/vault">
+            Alle spellen <ArrowUpRight size={18} />
           </Link>
-        </article>
-        <article className="feature-card crew-card">
-          <div className="card-top">
-            <span className="eyebrow">02 / THE CREW</span>
-            <Orbit size={19} />
-          </div>
-          <h2>
-            Same chaos.
-            <br />
-            <span>Your people.</span>
-          </h2>
-          <p>Jouw mensen. Ook buiten de stream.</p>
-          <div className="crew-emblem" aria-hidden="true">
-            <MessageCircle />
-            <span />
-            <span />
-          </div>
-          <Link href="/community" className="button outline">
-            Join the crew <ArrowUpRight size={16} />
-          </Link>
-        </article>
-      </section>
-      <section className="crew-strip content-width">
-        <div>
-          <span className="eyebrow">EEN PLEK VOOR DE CREW</span>
-          <h2>Kijk mee. Blijf verbonden.</h2>
         </div>
-        <p>
-          Je eigen profiel, je geregistreerde kijktijd en je eigen Vault Points. Alles op één plek.
+        <div className="game-shelf">
+          {GAME_IDS.map((game, index) => (
+            <Link href={`/vault?game=${game}`} className={`game-tile tile-${game}`} key={game}>
+              <span className="tile-number">0{index + 1}</span>
+              <GameArt game={game} />
+              <span className="tile-title">
+                {GAME_INFO[game].name}
+                <ArrowUpRight size={20} />
+              </span>
+            </Link>
+          ))}
+        </div>
+        <p className="games-note">
+          <Coins size={15} /> Je speelt met {config.pointsName} uit je kijktijd. Gratis punten, geen
+          geld of prijzen.
         </p>
-        <Link href="/account" aria-label="Bekijk je account">
-          <ArrowUpRight size={26} />
+      </section>
+      <section className="crew-invite content-width">
+        <div>
+          <p className="eyebrow">OOK NA DE STREAM</p>
+          <h2>
+            De chat gaat
+            <br />
+            gewoon door<span>.</span>
+          </h2>
+        </div>
+        <div className="crew-invite-copy">
+          <p>
+            Deel je beste moment, praat nog even na of kom gewoon lurken. Je vindt de crew op
+            Discord.
+          </p>
+          <Link href="/community" className="button light">
+            Bij de crew <ArrowUpRight size={18} />
+          </Link>
+        </div>
+        <span className="crew-asterisk" aria-hidden="true">
+          ✳
+        </span>
+      </section>
+      <section className="account-strip content-width">
+        <UserRound size={22} />
+        <div>
+          <h2>Jouw plek aan tafel.</h2>
+          <p>Je kijktijd, Vault Points en laatste rondes op één plek.</p>
+        </div>
+        <Link className="text-link" href="/account">
+          Mijn account <ArrowUpRight size={18} />
         </Link>
       </section>
     </div>
   );
 }
+
 export function StreamPage() {
   const { stream, account, config } = useSite();
   return (
-    <section className="standard-page content-width">
+    <section className="standard-page content-width stream-page">
       <div className="page-heading">
-        <p className="eyebrow">THE SIGNAL / FINNERTY</p>
+        <p className="eyebrow">FINNERTY OP TWITCH</p>
         <h1>
-          Watch stream<span>.</span>
+          Schuif aan<span>.</span>
         </h1>
-        <p>Schuif aan. Je bent bij de crew.</p>
+        <p>De stream aan. De rest komt wel.</p>
       </div>
       <div className="stream-page-grid">
         <div>
           <div className="stream-title">
             <StreamStatus />
-            <span>{stream.title || 'Welkom in de Finnertyverse'}</span>
+            <span>{stream.title || 'Finnerty op Twitch'}</span>
           </div>
           {stream.status === 'live' ? (
             <PlayerAnchor />
           ) : (
             <div className="offline-stage glass">
-              <OrbitArt />
-              <div>
-                <Orbit size={38} />
-                <h2>
-                  {stream.status === 'offline'
-                    ? 'Even tussen twee streams.'
-                    : 'We wachten op een signaal.'}
-                </h2>
-                <p>
-                  {stream.status === 'offline'
-                    ? 'Ontdek de universe terwijl de stream offline is.'
-                    : 'De Twitch-koppeling is nog niet beschikbaar.'}
-                </p>
-                <Link href="/vault" className="button outline">
-                  Explore The Vault <ArrowRight size={16} />
+              <span className="broadcast-mark" aria-hidden="true">
+                <Radio size={42} />
+              </span>
+              <p className="eyebrow">
+                {stream.status === 'offline' ? 'EVEN PAUZE' : 'NOG GEEN SIGNAAL'}
+              </p>
+              <h2>
+                {stream.status === 'offline' ? 'We zijn er even niet.' : 'Is Finnerty al live?'}
+              </h2>
+              <p>
+                {stream.status === 'offline'
+                  ? 'Volg het kanaal op Twitch, dan weet je wanneer de volgende stream begint.'
+                  : 'We kunnen de status nu niet ophalen. Je kunt het kanaal rechtstreeks op Twitch bekijken.'}
+              </p>
+              {config.channelLogin ? (
+                <a
+                  className="button primary"
+                  href={`https://www.twitch.tv/${config.channelLogin}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Bekijk op Twitch <ArrowUpRight size={18} />
+                </a>
+              ) : (
+                <Link href="/vault" className="button primary">
+                  Ondertussen een potje? <ArrowRight size={18} />
                 </Link>
-              </div>
+              )}
+              <span className="offline-wordmark" aria-hidden="true">
+                finnerty.
+              </span>
             </div>
           )}
           <div className="stream-account-bar">
             <div>
-              <Clock3 size={18} />
+              <Clock3 size={20} />
               <span>
-                Geregistreerde kijktijd
+                Kijktijd
                 <strong>
                   {account?.watchtimeSeconds
                     ? `${Math.floor(Number(account.watchtimeSeconds) / 60)} min`
@@ -190,26 +216,26 @@ export function StreamPage() {
               </span>
             </div>
             <div>
-              <Orbit size={18} />
+              <Coins size={20} />
               <span>
                 {config.pointsName}
                 <strong>
-                  {account ? `${account.balance} ${config.pointsSymbol}` : 'Jouw eigen punten'}
+                  {account
+                    ? `${account.balance} ${config.pointsSymbol}`
+                    : 'Kijken levert punten op'}
                 </strong>
               </span>
             </div>
-            <Link href="/account">
-              Mijn account <ArrowUpRight size={16} />
+            <Link className="text-link" href="/account">
+              Mijn account <ArrowUpRight size={17} />
             </Link>
           </div>
         </div>
         <aside className="stream-aside glass">
-          <Twitch size={27} />
-          <h2>De crew kijkt mee.</h2>
-          <p>De officiële Twitch-chat krijgt hier een plek zodra het kanaal is gekoppeld.</p>
-          <p className="muted">
-            Inloggen op deze site meldt je niet automatisch aan in de Twitch-chat.
-          </p>
+          <MessageCircle size={26} />
+          <p className="eyebrow">IN DE CHAT</p>
+          <h2>Zeg eens hallo.</h2>
+          <p>De Twitch-chat vind je bij het kanaal. Kijk mee, praat mee of lurk lekker verder.</p>
           {config.channelLogin && (
             <a
               className="button outline"
@@ -217,142 +243,167 @@ export function StreamPage() {
               target="_blank"
               rel="noreferrer"
             >
-              Open op Twitch <ArrowUpRight size={16} />
+              Open op Twitch <ArrowUpRight size={17} />
             </a>
           )}
+          <div className="aside-divider" />
+          <p className="eyebrow">NA DE STREAM</p>
+          <p>De gesprekken gaan door bij de crew.</p>
+          <Link className="text-link" href="/community">
+            Naar de community <ArrowRight size={17} />
+          </Link>
         </aside>
       </div>
     </section>
   );
 }
+
 export function CommunityPage() {
   const { config } = useSite();
   return (
-    <section className="standard-page content-width">
+    <section className="standard-page content-width community-page">
       <div className="page-heading">
-        <p className="eyebrow">02 / THE CREW</p>
+        <p className="eyebrow">DE MENSEN ACHTER DE CHAT</p>
         <h1>
-          Same chaos.
-          <br />
-          <span>Your people.</span>
+          Goed volk<span>.</span>
         </h1>
-        <p>{copy.community.description}</p>
+        <p>Nieuw gezicht of vaste lurker. Je hoort erbij.</p>
       </div>
-      <div className="community-panel glass">
+      <div className="community-panel">
         <div>
-          <MessageCircle size={35} />
-          <h2>De crew gaat door.</h2>
-          <p>Praat verder, deel je momenten en blijf verbonden.</p>
+          <p className="eyebrow">DE FINNERTY DISCORD</p>
+          <h2>
+            Zelfde crew.
+            <br />
+            Ander tabblad.
+          </h2>
+          <p>
+            Praat na over de stream, deel je clips en blijf hangen. Ook als de camera uit staat.
+          </p>
           {config.discordUrl ? (
-            <a className="button primary" href={config.discordUrl} target="_blank" rel="noreferrer">
-              Join Discord <ArrowUpRight size={17} />
+            <a className="button dark" href={config.discordUrl} target="_blank" rel="noreferrer">
+              Open Discord <ArrowUpRight size={18} />
             </a>
           ) : (
-            <p className="connection-note">De Discord-uitnodiging wordt nog toegevoegd.</p>
+            <p className="connection-note">De Discord-uitnodiging komt eraan.</p>
           )}
         </div>
-        <div className="community-orbit" aria-hidden="true">
-          <Orbit />
-          <span>THE CREW</span>
+        <div className="community-print" aria-hidden="true">
+          <span>JE BENT</span>
+          <b>ERBIJ.</b>
+          <span>✳ FINNERTY & FRIENDS ✳</span>
         </div>
       </div>
-      <section className="leaderboard-section">
-        <p className="eyebrow">CREW LEADERBOARD</p>
-        <h2>Een eigen plek in de universe.</h2>
-        <p>
-          Vault Points uit kijktijd en The Vault. Siteaccounts staan er standaard in en kunnen zich
-          altijd onzichtbaar maken in hun account.
-        </p>
+      <section className="community-ranking">
+        <div className="ranking-intro">
+          <p className="eyebrow">VOOR DE EER</p>
+          <h2>
+            Wie staat
+            <br />
+            er bovenaan?
+          </h2>
+          <p>De punten komen van meekijken en spelen. De opscheprechten zijn helemaal van jou.</p>
+          <Link href="/vault" className="text-link">
+            Speel in The Vault <ArrowRight size={18} />
+          </Link>
+          <p className="small-note">
+            Liever uit de ranglijst? Je zet je zichtbaarheid uit in je account.
+          </p>
+        </div>
         <Leaderboard limit={25} />
-        <Link href="/vault" className="text-link">
-          Naar The Vault <ArrowRight size={15} />
-        </Link>
       </section>
     </section>
   );
 }
+
 export function PrivacyPage() {
+  const { config } = useSite();
   return (
     <section className="standard-page content-width prose">
-      <p className="eyebrow">JOUW ACCOUNT / JOUW GEGEVENS</p>
+      <p className="eyebrow">JE GEGEVENS</p>
       <h1>
         Privacy<span>.</span>
       </h1>
+      <p className="prose-intro">Wat we bewaren, waarom en wat je zelf kunt instellen.</p>
+      <h2>Je account</h2>
       <p>
-        Deze versie is een lokale ontwikkelpreview. Demoaccounts en gesimuleerde kijktijd staan
-        uitsluitend in de lokale ontwikkeldatabase.
-      </p>
-      <h2>Wat de website zal bewaren</h2>
-      <p>
-        Je vaste Twitch-identiteit, profielnaam, sessie, geverifieerde kijktijdregistraties en het
-        eigen puntenjournaal. StreamElements levert uitsluitend kijktijd; bestaande
+        We bewaren je Twitch-identiteit, profielnaam, sessie, geverifieerde kijktijdregistraties en
+        je puntenjournaal. StreamElements levert uitsluitend kijktijd; bestaande
         StreamElements-punten worden niet gebruikt.
       </p>
-      <h2>Je profiel en verwijderen</h2>
+      <h2>Je zichtbaarheid</h2>
       <p>
-        Je Twitch-weergavenaam, avatar en puntenstand staan standaard in de leaderboards van The
-        Vault en de community. Dat zijn gegevens die je op Twitch al openbaar toont. In je account
-        zet je dat met één klik uit, en je kunt er een aanvraag voor verwijdering registreren. Deze
-        aanvraag wordt opgeslagen, maar verwijdert nog geen gegevens en verstuurt niets naar een
-        externe partij.
+        Je Twitch-weergavenaam, avatar en puntenstand staan standaard in de leaderboards. In je
+        account kun je dat uitzetten. Daar kun je ook een verwijderingsverzoek registreren. Dat
+        verzoek wordt opgeslagen voor de beheerder en verwijdert niet direct je gegevens.
       </p>
       <h2>Externe diensten</h2>
       <p>
-        Een echte Twitch-embed maakt verbinding met Twitch. In deze demomodus is de player lokaal
-        gesimuleerd en wordt geen Twitch-embed geladen.
+        {config.demo
+          ? 'Je bekijkt de lokale demo. Accounts, kijktijd en de videoplayer zijn gesimuleerd; er wordt geen Twitch-embed geladen.'
+          : 'De Twitch-player maakt verbinding met Twitch. Inloggen op deze website en inloggen in de Twitch-chat zijn aparte sessies.'}
       </p>
-      <h2>Voor publicatie nog vast te leggen</h2>
+      <h2>Status van deze verklaring</h2>
       <p>
-        Contactgegevens van de eigenaar, bewaartermijnen, afhandeling van verwijderingsverzoeken en
-        eventuele anonimisering van noodzakelijke journaalgegevens. Dit is nog geen definitieve
-        privacyverklaring.
+        Dit is een concept. Contactgegevens van de eigenaar, bewaartermijnen en de verdere
+        afhandeling van verwijderingsverzoeken moeten nog worden vastgelegd.
       </p>
       <Link href="/account" className="button outline">
-        Naar mijn account <ArrowUpRight size={16} />
+        Naar mijn account <ArrowUpRight size={18} />
       </Link>
     </section>
   );
 }
+
 export function AdminPage() {
   return (
     <section className="standard-page content-width">
       <div className="restricted-panel glass">
-        <ShieldCheck size={35} />
-        <p className="eyebrow">BEHEER / BESCHERMD</p>
-        <h1>Alleen voor beheerders.</h1>
+        <ShieldCheck size={32} />
+        <p className="eyebrow">ALLEEN VOOR BEHEERDERS</p>
+        <h1>
+          Achter de schermen<span>.</span>
+        </h1>
         <p>
-          Beheer wordt gekoppeld aan expliciet toegestane, geverifieerde Twitch user ID’s. De lokale
-          demo geeft geen beheertoegang.
+          Deze plek is alleen toegankelijk voor geverifieerde beheerders. De lokale demo geeft geen
+          beheertoegang.
         </p>
-        <Link href="/" className="button outline">
-          Terug naar home <ArrowRight size={16} />
+        <Link href="/" className="button primary">
+          Terug naar home <ArrowRight size={18} />
         </Link>
       </div>
     </section>
   );
 }
+
 export function AccountIntro() {
   const { config } = useSite();
   return (
     <div className="account-intro glass">
-      <Fingerprint size={36} />
-      <p className="eyebrow">JOUW PLEK IN DE CREW</p>
-      <h2>
-        One crew.
-        <br />
-        Your identity.
-      </h2>
-      <p>
-        Bekijk je geregistreerde kijktijd en eigen punten. Je profiel blijft gekoppeld aan jouw
-        vaste Twitch-identiteit.
-      </p>
-      <LoginButton />
-      <div className="account-explainer">
-        <CircleHelp size={16} />
-        <span>
+      <div className="account-intro-copy">
+        <UserRound size={32} />
+        <h2>
+          Een vaste plek
+          <br />
+          voor jou.
+        </h2>
+        <p>Log in met Twitch en houd je kijktijd, punten en gespeelde rondes bij.</p>
+        <LoginButton />
+        <p className="account-explainer">
           {config.demo
-            ? 'In deze preview maak je een geïsoleerd demoaccount met gesimuleerde gegevens.'
-            : 'Je Twitch-identiteit wordt veilig gekoppeld. We vragen geen toegang tot je e-mailadres.'}
+            ? 'In deze preview gebruik je een demoaccount met gesimuleerde gegevens.'
+            : 'Je gebruikt je bestaande Twitch-account. We vragen geen toegang tot je e-mailadres.'}
+        </p>
+      </div>
+      <div className="member-card" aria-hidden="true">
+        <span>FINNERTY CREW</span>
+        <b>
+          Jij bent
+          <br />
+          erbij.
+        </b>
+        <span className="member-card-bottom">
+          MEMBER ACCESS <span>✳</span>
         </span>
       </div>
     </div>

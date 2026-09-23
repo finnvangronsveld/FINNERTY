@@ -8,7 +8,7 @@ De actuele gebruikersopdracht en volledige masterprompt zijn gelezen. De tekst i
 
 | Route        | Huidige invulling                                                              |
 | ------------ | ------------------------------------------------------------------------------ |
-| `/`          | Frost Orbit-hero, streamactie, Vault-kaart en community                        |
+| `/`          | Typografische hero, Vault-poster, vier directe spelkaarten en community        |
 | `/stream`    | Uitgebreide playerzone of eerlijke offline/onbekend-state, accountstrook       |
 | `/vault`     | Gameroom: saldo, vier spellen, leaderboard totaal/maand, rondes, huisregels    |
 | `/account`   | Identiteit, kijktijd, saldo/totaal verdiend, pagineerbaar journaal en voorkeur |
@@ -30,7 +30,7 @@ Voorlopige naam: Vault Points / VP. Serverconfiguratie bepaalt labels. De demo g
 
 ## Ontwerp
 
-Leidend: `references/07-frost-orbit.png`. Canvas #030812, diepblauw glas, zilver en ijsblauwe accenten. Manrope en Space Grotesk lokaal geladen via Fontsource (OFL). Geen externe fontrequests. Sculpturale afbeelding is losse decoratie, geen screenshotinterface. De kleine kaartobjecten zijn CSS/SVG; geen WebGL nodig.
+Het redesign van september 2026 gebruikt canvas #111210, crème #e8e4d8 en vermiljoen #ff6845. Manrope draagt de koppen en bodytekst; Space Grotesk de compacte metadata en cijfers. Beide families worden lokaal geladen via Fontsource (OFL). De Vault-poster en spelillustraties zijn CSS/SVG. De oude ruimtebeelden worden niet meer geladen. Zie [ontwerp en validatie](design-redesign-2026-09-23.md).
 
 Mobiel <432 px of een zeer lage viewport: livebalk met Twitch-link. Dit is de expliciete productuitzondering op een altijd zichtbare video vanwege de embedminimumafmetingen. Een ontbrekende echte kanaallink wordt gemeld in plaats van gegokt.
 

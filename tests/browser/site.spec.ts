@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
-test('responsive Frost Orbit routes without horizontal overflow', async ({ page }) => {
+test('responsive Finnerty routes without horizontal overflow', async ({ page }) => {
   await mkdir('docs/screenshots', { recursive: true });
   for (const width of [360, 390, 430, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
@@ -94,6 +94,23 @@ test('the Vault plays one paced round at a time and ranks visible players', asyn
   await expect(page.locator('.ledger-row').first()).toContainText('The Vault · Coinflip');
   expect(errors).toEqual([]);
 });
+test('home game cards open the matching game and mobile controls stay compact', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  for (const game of ['coinflip', 'dice', 'slots', 'roulette']) {
+    await page.locator(`.game-shelf a[href="/vault?game=${game}"]`).click();
+    await expect(page.locator(`#tab-${game}`)).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator(`.game.${game}`)).toBeVisible();
+    await page.getByRole('link', { name: 'Finnerty home' }).click();
+  }
+  await page.goto('/vault?game=unknown');
+  await expect(page.locator('#tab-coinflip')).toHaveAttribute('aria-selected', 'true');
+  await page.evaluate(() => document.fonts.ready);
+  const playBounds = await page.locator('.play-button').boundingBox();
+  expect(playBounds!.y + playBounds!.height).toBeLessThan(1000);
+});
 test('demo account persists, uses paginated ledger, protects writes and revokes logout', async ({
   page,
 }) => {
@@ -138,7 +155,7 @@ test('demo account persists, uses paginated ledger, protects writes and revokes 
     ),
     page.getByRole('button', { name: 'Uitloggen' }).click(),
   ]);
-  await expect(page.getByRole('heading', { name: 'One crew. Your identity.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Een vaste plek voor jou.' })).toBeVisible();
   expect((await page.request.get('/api/account')).status()).toBe(401);
   expect(
     (
@@ -198,7 +215,7 @@ test('keyboard focus and reduced motion preference remain usable', async ({ page
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toBeFocused();
   expect(
-    await page.locator('.hero .orbit-art').evaluate((el) => getComputedStyle(el).animationName),
+    await page.locator('.hero-content').evaluate((el) => getComputedStyle(el).animationName),
   ).toBe('none');
   await page.getByRole('button', { name: 'Effecten beperken' }).click();
   await page.reload();

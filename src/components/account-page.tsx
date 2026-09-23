@@ -81,9 +81,9 @@ export function AccountPage() {
   return (
     <section className="standard-page content-width">
       <div className="page-heading">
-        <p className="eyebrow">CREW IDENTITY</p>
+        <p className="eyebrow">JOUW ACCOUNT</p>
         <h1>
-          Jouw orbit<span>.</span>
+          Hé, jij<span>.</span>
         </h1>
         <p>Je profiel, je kijktijd en jouw eigen punten.</p>
       </div>
