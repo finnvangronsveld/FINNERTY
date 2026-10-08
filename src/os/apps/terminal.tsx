@@ -4,7 +4,6 @@ import { APPS, AppId, AppProps } from '../apps';
 import { basename, getNode, join, list, makeFolder, parent, split, trash, writeFile } from '../fs';
 import { getState } from '../store';
 import { close, openApp, openFile, play } from '../wm';
-import type { SoundName } from '@/lib/sfx';
 
 type Line = { kind: 'in' | 'out' | 'err'; text: string };
 
@@ -19,7 +18,8 @@ const HELP = `Commands:
   rm <name>         move to the Trash
   echo <text>       print text (echo hi > note.txt saves it)
   apps              list the apps
-  play <sound>      hello, follow, raid, hype, gg, clip, cozy, lurk, brb, oops, thanks, night
+  play <game>       snake, 2048, bricks, blocks, minesweeper
+  scores            open the leaderboards
   twitch            open the stream
   neofetch          system info
   date, whoami, clear, history, exit`;
@@ -139,12 +139,15 @@ export function Terminal({ win }: AppProps) {
         say(Object.values(APPS).map((a) => `${a.name.padEnd(20)}${a.blurb}`).join('\n'));
         break;
       case 'play': {
-        const name = `sb-${args[0]}` as SoundName;
-        const ok = ['hello', 'follow', 'raid', 'hype', 'gg', 'clip', 'cozy', 'lurk', 'brb', 'oops', 'thanks', 'night'].includes(args[0]);
-        if (ok) play(name);
-        else err('play: unknown sound. Try: play hype');
+        const games = ['snake', '2048', 'bricks', 'blocks', 'minesweeper'];
+        if (games.includes(args[0])) openApp(args[0] as AppId);
+        else err(`play: unknown game. Try: play ${games.join(', play ')}`);
         break;
       }
+      case 'scores':
+        openApp('gamecenter');
+        say('Opening Game Center...');
+        break;
       case 'twitch':
         openApp('twitch');
         say('Opening the stream...');

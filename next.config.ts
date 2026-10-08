@@ -18,7 +18,7 @@ const config: NextConfig = {
               "default-src 'self'",
               `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ''}`,
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://static-cdn.jtvnw.net",
+              "img-src 'self' data: blob: https:",
               "font-src 'self'",
               `connect-src 'self'${dev ? ' ws://localhost:* ws://127.0.0.1:*' : ''}`,
               "frame-src https:",

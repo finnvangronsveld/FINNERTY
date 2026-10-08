@@ -16,7 +16,7 @@ export function desktopBounds() {
 export const isCompact = () => typeof window !== 'undefined' && window.innerWidth < 760;
 
 export function play(name: Parameters<ReturnType<typeof sfx>['play']>[0], opts?: Parameters<ReturnType<typeof sfx>['play']>[1]) {
-  if (getState().settings.uiSounds || name.startsWith('sb-')) sfx().play(name, opts);
+  if (getState().settings.uiSounds) sfx().play(name, opts);
 }
 
 export function focusedApp(): AppId | null {
@@ -70,6 +70,7 @@ export function openFile(path: string) {
   if (node.kind === 'folder') return openApp('finder', { path }, node.name || 'Finn HD');
   if (node.kind === 'text') return openApp('textedit', { path }, node.name);
   if (node.kind === 'image') return openApp('preview', { path }, node.name);
+  if (node.kind === 'app' && node.content && node.content in APPS) return openApp(node.content as AppId);
   if (node.kind === 'link' && node.content) {
     if (node.content.includes('twitch.tv/finnerty_')) return openApp('twitch');
     return openApp('browser', { url: node.content }, basename(path));

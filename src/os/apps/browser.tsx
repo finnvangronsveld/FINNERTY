@@ -1,34 +1,25 @@
 'use client';
-import { useState } from 'react';
-import { ArrowClockwise, ArrowSquareOut, CaretLeft, CaretRight, House, Lock } from '@phosphor-icons/react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowClockwise, ArrowSquareOut, BookOpen, CaretLeft, CaretRight, House, Lock, MagnifyingGlass, TextAa } from '@phosphor-icons/react';
 import { LINKS } from '@/lib/links';
 import type { AppProps } from '../apps';
-import { openApp, setData, setTitle } from '../wm';
+import { openApp, setTitle } from '../wm';
 
-const HOME = 'finnos://top-sites';
+type Entry = { kind: 'home' } | { kind: 'page'; url: string } | { kind: 'search'; q: string };
+type Page = { kind: 'page'; url: string; title: string; siteName?: string; byline?: string | null; html: string; mode: string };
+type Results = { kind: 'search'; q: string; results: { title: string; url: string; snippet: string; source: string }[] };
 
-/** Sites that refuse to be shown inside another page (X-Frame-Options / CSP). */
-const BLOCKS_FRAMES = [
-  'youtube.com', 'youtu.be', 'google.', 'x.com', 'twitter.com', 'instagram.com', 'tiktok.com', 'facebook.com',
-  'github.com', 'reddit.com', 'discord.com', 'amazon.', 'netflix.com', 'linkedin.com', 'spotify.com', 'twitch.tv',
-];
+/** Sites built entirely in JavaScript or behind logins: no readable text to fetch. */
+const NEEDS_REAL_BROWSER = ['youtube.com', 'youtu.be', 'twitch.tv', 'x.com', 'twitter.com', 'instagram.com', 'tiktok.com', 'facebook.com', 'discord.com', 'netflix.com', 'spotify.com'];
 
 const TOP_SITES = [
+  { title: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Main_Page', color: ['#f4f4f4', '#9a9a9a'] },
+  { title: 'BBC News', url: 'https://www.bbc.com/news', color: ['#ff9a9a', '#b80000'] },
+  { title: 'Hacker News', url: 'https://news.ycombinator.com/', color: ['#ffc58a', '#e86a00'] },
+  { title: 'VRT NWS', url: 'https://www.vrt.be/vrtnws/nl/', color: ['#9fd0ff', '#1d4fa0'] },
   { title: 'Finnerty on Twitch', url: LINKS.twitch, color: ['#c3a4ff', '#5b2fd0'] },
-  { title: 'Finnerty on YouTube', url: LINKS.youtube, color: ['#ff9a9a', '#c9161d'] },
-  { title: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Special:Random', color: ['#f4f4f4', '#9a9a9a'] },
-  { title: 'Internet Archive', url: 'https://web.archive.org/', color: ['#d8d0c0', '#6e6450'] },
-  { title: 'OpenStreetMap', url: 'https://www.openstreetmap.org/export/embed.html?bbox=4.2,50.7,5.6,51.4', color: ['#bfe7b0', '#3f8a35'] },
-  { title: 'Kenney (site sounds)', url: 'https://kenney.nl/assets', color: ['#ffd27a', '#ea5a12'] },
+  { title: 'Kenney', url: 'https://kenney.nl/', color: ['#ffd27a', '#ea5a12'] },
 ];
-
-function normalize(input: string) {
-  const t = input.trim();
-  if (!t) return HOME;
-  if (/^(https?:|finnos:)/i.test(t)) return t;
-  if (/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(t)) return `https://${t}`;
-  return `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(t)}`;
-}
 
 const hostOf = (url: string) => {
   try {
@@ -38,100 +29,183 @@ const hostOf = (url: string) => {
   }
 };
 
+function toEntry(input: string): Entry {
+  const t = input.trim();
+  if (!t) return { kind: 'home' };
+  if (/^https?:\/\//i.test(t)) return { kind: 'page', url: t };
+  if (/^[\w-]+(\.[\w-]+)+(:\d+)?(\/\S*)?$/.test(t)) return { kind: 'page', url: `https://${t}` };
+  return { kind: 'search', q: t };
+}
+
+function initial(data?: Record<string, string>): Entry {
+  if (data?.q) return { kind: 'search', q: data.q };
+  if (data?.url) return toEntry(data.url);
+  return { kind: 'home' };
+}
+
 export function Browser({ win }: AppProps) {
-  const url = win.data?.url ?? HOME;
-  const [field, setField] = useState(url === HOME ? '' : url);
-  const [hist, setHist] = useState<{ back: string[]; fwd: string[] }>({ back: [], fwd: [] });
-  const [nonce, setNonce] = useState(0);
+  const [hist, setHist] = useState<{ stack: Entry[]; i: number }>(() => ({ stack: [initial(win.data)], i: 0 }));
+  const [content, setContent] = useState<Page | Results | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [field, setField] = useState('');
+  const [big, setBig] = useState(false);
+  const [nonce, setNonce] = useState(0);
+  const view = useRef<HTMLDivElement>(null);
+  const entry = hist.stack[hist.i];
 
-  const host = hostOf(url);
-  const blocked = url !== HOME && BLOCKS_FRAMES.some((b) => host.includes(b));
-
-  const go = (next: string) => {
-    if (/twitch\.tv\/finnerty_/i.test(next)) {
+  const go = (e: Entry) => {
+    if (e.kind === 'page' && /twitch\.tv\/finnerty_/i.test(e.url)) {
       openApp('twitch');
       return;
     }
-    setHist((h) => ({ back: [...h.back, url], fwd: [] }));
-    setData(win.id, { url: next });
-    setField(next === HOME ? '' : next);
-    setTitle(win.id, next === HOME ? 'Top Sites' : hostOf(next) || 'Navigator');
-    setLoading(next !== HOME);
+    setHist((h) => ({ stack: [...h.stack.slice(0, h.i + 1), e], i: h.i + 1 }));
   };
 
-  const step = (dir: 'back' | 'fwd') => {
-    const target = dir === 'back' ? hist.back.at(-1) : hist.fwd[0];
-    if (!target) return;
-    setHist((h) =>
-      dir === 'back'
-        ? { back: h.back.slice(0, -1), fwd: [url, ...h.fwd] }
-        : { back: [...h.back, url], fwd: h.fwd.slice(1) },
-    );
-    setData(win.id, { url: target });
-    setField(target === HOME ? '' : target);
+  // Load whatever the current history entry points at.
+  useEffect(() => {
+    let alive = true;
+    const label = entry.kind === 'home' ? '' : entry.kind === 'search' ? entry.q : entry.url;
+    const t = window.setTimeout(() => {
+      setField(label);
+      setError(null);
+      if (entry.kind === 'home') {
+        setContent(null);
+        setTitle(win.id, 'Top Sites');
+        return;
+      }
+      if (entry.kind === 'page' && NEEDS_REAL_BROWSER.some((h) => hostOf(entry.url).endsWith(h))) {
+        setContent(null);
+        setError(`${hostOf(entry.url)} only works in a full browser.`);
+        setTitle(win.id, hostOf(entry.url));
+        return;
+      }
+      setLoading(true);
+      setContent(null);
+      const qs = entry.kind === 'search' ? `q=${encodeURIComponent(entry.q)}` : `url=${encodeURIComponent(entry.url)}`;
+      fetch(`/api/reader?${qs}`)
+        .then(async (r) => {
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error ?? 'That page couldn’t be loaded.');
+          return d as Page | Results;
+        })
+        .then((d) => {
+          if (!alive) return;
+          setContent(d);
+          setTitle(win.id, d.kind === 'search' ? `${d.q} - Search` : d.title);
+          if (d.kind === 'page') setField(d.url);
+          view.current?.scrollTo(0, 0);
+        })
+        .catch((e: Error) => alive && setError(e.message))
+        .finally(() => alive && setLoading(false));
+    }, 0);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
+  }, [entry, nonce, win.id]);
+
+  // Links inside a page stay inside Navigator. Ctrl/Cmd-click opens a new Navigator window.
+  const onClick = (e: React.MouseEvent) => {
+    const a = (e.target as HTMLElement).closest('a');
+    if (!a) return;
+    const href = a.getAttribute('href');
+    e.preventDefault();
+    if (!href) return;
+    if (href.startsWith('mailto:')) {
+      window.open(href);
+      return;
+    }
+    const base = content?.kind === 'page' ? content.url : undefined;
+    let url: URL;
+    try {
+      url = new URL(href, base);
+    } catch {
+      return;
+    }
+    if (base && url.href.split('#')[0] === base.split('#')[0] && url.hash) {
+      view.current?.querySelector(`[id="${CSS.escape(url.hash.slice(1))}"]`)?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    if (e.ctrlKey || e.metaKey || e.button === 1) openApp('browser', { url: url.href });
+    else go({ kind: 'page', url: url.href });
   };
+
+  const realUrl = entry.kind === 'page' ? entry.url : null;
 
   return (
     <div className="browser">
       <div className="toolbar">
         <div className="seg">
-          <button type="button" className="seg__btn" aria-label="Back" disabled={!hist.back.length} onClick={() => step('back')}>
+          <button type="button" className="seg__btn" aria-label="Back" disabled={hist.i === 0} onClick={() => setHist((h) => ({ ...h, i: h.i - 1 }))}>
             <CaretLeft size={13} weight="bold" />
           </button>
-          <button type="button" className="seg__btn" aria-label="Forward" disabled={!hist.fwd.length} onClick={() => step('fwd')}>
+          <button
+            type="button"
+            className="seg__btn"
+            aria-label="Forward"
+            disabled={hist.i >= hist.stack.length - 1}
+            onClick={() => setHist((h) => ({ ...h, i: h.i + 1 }))}
+          >
             <CaretRight size={13} weight="bold" />
           </button>
         </div>
         <button type="button" className="tb-icon" aria-label="Reload" onClick={() => setNonce((n) => n + 1)}>
           <ArrowClockwise size={14} weight="bold" />
         </button>
-        <button type="button" className="tb-icon" aria-label="Top Sites" onClick={() => go(HOME)}>
+        <button type="button" className="tb-icon" aria-label="Top Sites" onClick={() => go({ kind: 'home' })}>
           <House size={14} weight="fill" />
         </button>
         <form
           className="address"
           onSubmit={(e) => {
             e.preventDefault();
-            go(normalize(field));
+            go(toEntry(field));
           }}
         >
-          {url.startsWith('https') && <Lock size={11} weight="fill" className="address__lock" aria-hidden />}
+          {entry.kind === 'page' && entry.url.startsWith('https') ? (
+            <Lock size={11} weight="fill" className="address__lock" aria-hidden />
+          ) : (
+            <MagnifyingGlass size={11} weight="bold" className="address__lock" aria-hidden />
+          )}
           <input
             className="address__input"
             value={field}
-            placeholder="Search Wikipedia or type an address"
-            aria-label="Address"
+            placeholder="Search or type a web address"
+            aria-label="Address or search"
             onChange={(e) => setField(e.target.value)}
             onFocus={(e) => e.target.select()}
           />
           {loading && <span className="address__progress" aria-hidden />}
         </form>
+        <button type="button" className="tb-icon" aria-label="Text size" data-on={big} onClick={() => setBig(!big)}>
+          <TextAa size={14} weight="bold" />
+        </button>
         <button
           type="button"
           className="tb-icon"
-          aria-label="Open in a new browser tab"
-          disabled={url === HOME}
-          onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+          aria-label="Open the real page in a new browser tab"
+          disabled={!realUrl}
+          onClick={() => realUrl && window.open(realUrl, '_blank', 'noopener,noreferrer')}
         >
           <ArrowSquareOut size={14} weight="bold" />
         </button>
       </div>
       <div className="bookmarks">
-        {TOP_SITES.slice(0, 4).map((s) => (
-          <button key={s.url} type="button" className="bookmarks__item" onClick={() => go(s.url)}>
+        {TOP_SITES.slice(0, 5).map((s) => (
+          <button key={s.url} type="button" className="bookmarks__item" onClick={() => go({ kind: 'page', url: s.url })}>
             {s.title}
           </button>
         ))}
       </div>
 
-      <div className="browser__view">
-        {url === HOME ? (
+      <div className="browser__view" ref={view} onClick={onClick} onAuxClick={onClick} data-big={big}>
+        {entry.kind === 'home' && (
           <div className="topsites">
             <h2 className="topsites__title">Top Sites</h2>
             <div className="topsites__grid">
               {TOP_SITES.map((s) => (
-                <button key={s.url} type="button" className="topsite" onClick={() => go(s.url)}>
+                <button key={s.url} type="button" className="topsite" onClick={() => go({ kind: 'page', url: s.url })}>
                   <span className="topsite__thumb" style={{ background: `linear-gradient(160deg, ${s.color[0]}, ${s.color[1]})` }}>
                     <span className="topsite__host">{hostOf(s.url)}</span>
                   </span>
@@ -140,24 +214,58 @@ export function Browser({ win }: AppProps) {
               ))}
             </div>
           </div>
-        ) : blocked ? (
-          <div className="blocked">
-            <p className="blocked__title">{host} can’t be shown inside FinnOS</p>
-            <p className="blocked__text">This site doesn’t allow other pages to display it. You can open it in a real browser tab instead.</p>
-            <button type="button" className="gel gel--blue" onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}>
-              Open {host}
-            </button>
+        )}
+
+        {entry.kind !== 'home' && loading && !content && (
+          <div className="reader reader--loading" aria-busy="true">
+            <span className="skel skel--title" />
+            <span className="skel" />
+            <span className="skel" />
+            <span className="skel skel--short" />
           </div>
-        ) : (
-          <iframe
-            key={`${url}#${nonce}`}
-            className="browser__frame"
-            src={url}
-            title={host}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-            referrerPolicy="no-referrer"
-            onLoad={() => setLoading(false)}
-          />
+        )}
+
+        {error && (
+          <div className="blocked">
+            <p className="blocked__title">{error}</p>
+            <p className="blocked__text">
+              Navigator shows a cleaned-up version of web pages. Video sites, apps and pages behind a login need a real browser.
+            </p>
+            {realUrl && (
+              <button type="button" className="gel gel--blue" onClick={() => window.open(realUrl, '_blank', 'noopener,noreferrer')}>
+                Open {hostOf(realUrl)}
+              </button>
+            )}
+          </div>
+        )}
+
+        {!error && content?.kind === 'search' && entry.kind === 'search' && (
+          <div className="serp">
+            <p className="serp__meta">Results for “{content.q}”</p>
+            {content.results.length === 0 && <p className="serp__meta">No results. Try other words, or type a web address.</p>}
+            {content.results.map((r) => (
+              <article key={r.url} className="serp__hit">
+                <a href={r.url} className="serp__title">
+                  {r.title}
+                </a>
+                <span className="serp__url">{r.url.replace(/^https?:\/\//, '')}</span>
+                <p className="serp__snippet">{r.snippet}</p>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {!error && content?.kind === 'page' && entry.kind === 'page' && (
+          <article className="reader" lang="">
+            <p className="reader__site">
+              {content.mode === 'article' && <BookOpen size={12} weight="fill" />} {content.siteName ?? hostOf(content.url)}
+              <span className="reader__badge">{content.mode === 'article' ? 'Reader' : 'Simplified'}</span>
+            </p>
+            {content.mode === 'article' && <h1 className="reader__title">{content.title}</h1>}
+            {content.byline && <p className="reader__byline">{content.byline}</p>}
+            {/* Sanitised on the server: no scripts, styles, forms or frames. */}
+            <div className="reader__body" dangerouslySetInnerHTML={{ __html: content.html }} />
+          </article>
         )}
       </div>
     </div>

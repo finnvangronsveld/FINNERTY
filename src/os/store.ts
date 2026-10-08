@@ -40,6 +40,8 @@ export type Dialog = {
   buttons: { label: string; primary?: boolean; action?: () => void }[];
 };
 
+export type Player = { id: string; login: string; name: string; avatar: string | null };
+
 export type Phase = 'boot' | 'login' | 'desktop' | 'sleep' | 'off';
 
 export type OSState = {
@@ -54,6 +56,8 @@ export type OSState = {
   uptime: string | null;
   avatar: string | null;
   dialog: Dialog | null;
+  player: Player | null;
+  loginAvailable: boolean;
 };
 
 const SETTINGS_KEY = 'finnos:settings';
@@ -87,6 +91,8 @@ let state: OSState = {
   uptime: null,
   avatar: null,
   dialog: null,
+  player: null,
+  loginAvailable: false,
 };
 
 const listeners = new Set<() => void>();

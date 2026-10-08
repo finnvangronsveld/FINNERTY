@@ -1,5 +1,7 @@
 'use client';
 import { FileText, Globe, HardDrives, Image as ImageIcon, TwitchLogo, YoutubeLogo } from '@phosphor-icons/react';
+import { AppIcon } from '@/components/app-icon';
+import { APPS, AppId } from './apps';
 import { useOS } from './store';
 
 type Kind = 'folder' | 'text' | 'image' | 'link' | 'drive' | 'app';
@@ -15,6 +17,14 @@ export function FileIcon({ kind, name, size = 48, content }: { kind: Kind; name:
       <span className="ficon ficon--folder" data-special={special} style={style} aria-hidden>
         <span className="ficon__tab" />
         <span className="ficon__body" />
+      </span>
+    );
+  }
+  if (kind === 'app' && content && content in APPS) {
+    const a = APPS[content as AppId];
+    return (
+      <span className="ficon ficon--app" style={style} aria-hidden>
+        <AppIcon Icon={a.Icon} from={a.from} to={a.to} />
       </span>
     );
   }

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { MagnifyingGlass, SpeakerHigh, SpeakerSlash, TwitchLogo } from '@phosphor-icons/react';
+import { MagnifyingGlass, SpeakerHigh, SpeakerSlash, TwitchLogo, UserCircle } from '@phosphor-icons/react';
+import { logIn, logOut } from './account';
 import { sfx } from '@/lib/sfx';
 import { LINKS } from '@/lib/links';
 import { APPS } from './apps';
@@ -190,6 +191,56 @@ function Clock() {
   );
 }
 
+function Account() {
+  const player = useOS((s) => s.player);
+  const loginAvailable = useOS((s) => s.loginAvailable);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const off = (e: PointerEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
+    document.addEventListener('pointerdown', off);
+    return () => document.removeEventListener('pointerdown', off);
+  }, [open]);
+  if (!player && !loginAvailable) return null;
+  return (
+    <div className="mb__vol" ref={ref}>
+      <button type="button" className="mb__status mb__account" onClick={() => setOpen(!open)} aria-label="Account">
+        {player?.avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={player.avatar} alt="" className="mb__avatar" />
+        ) : (
+          <UserCircle size={16} weight="fill" />
+        )}
+        <span className="mb__account-name">{player ? player.name : 'Log In'}</span>
+      </button>
+      {open && (
+        <div className="menu menu--right">
+          {player ? (
+            <>
+              <p className="menu__head">Signed in as {player.name}</p>
+              <button type="button" className="menu__item" onClick={() => { setOpen(false); openApp('gamecenter'); }}>
+                <span className="menu__checkmark" />Game Center
+              </button>
+              <hr className="menu__sep" />
+              <button type="button" className="menu__item" onClick={() => { setOpen(false); void logOut(); }}>
+                <span className="menu__checkmark" />Log Out
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="menu__head">Save your high scores</p>
+              <button type="button" className="menu__item" onClick={() => logIn(focusedApp() ?? 'gamecenter')}>
+                <span className="menu__checkmark" />Log in with Twitch…
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Volume() {
   const [open, setOpen] = useState(false);
   const volume = useOS((s) => s.settings.volume);
@@ -318,6 +369,7 @@ export function MenuBar() {
           <TwitchLogo size={15} weight="fill" />
           {live && <span className="mb__live-text">LIVE</span>}
         </button>
+        <Account />
         <Volume />
         <Clock />
         <button

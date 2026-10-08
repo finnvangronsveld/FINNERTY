@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from 'next';
 import { Yellowtail } from 'next/font/google';
 import './globals.css';
+import './games.css';
 
 const neon = Yellowtail({ weight: '400', subsets: ['latin'], variable: '--font-neon', display: 'swap' });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://finnerty.vercel.app'),
   title: 'Finnerty',
-  description: 'FinnOS: Finnerty’s corner of the internet, built as a glossy desktop computer. Watch the stream, play with the soundboard and poke around.',
+  description: 'FinnOS: Finnerty’s corner of the internet, built as a glossy desktop computer. Watch the stream, play games for the leaderboards and poke around.',
   openGraph: {
     title: 'Finnerty',
     description: 'Pull up a chair and hang out with chat. Live on Twitch as finnerty_.',

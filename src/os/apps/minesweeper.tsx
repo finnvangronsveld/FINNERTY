@@ -1,6 +1,9 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { Bomb, Flag, Smiley, SmileySad, SmileyWink } from '@phosphor-icons/react';
+import { Bomb, Flag, Smiley, SmileySad, SmileyWink, TwitchLogo } from '@phosphor-icons/react';
+import { logIn } from '../account';
+import { RunResult, useBest, useRun } from '../games/kit';
+import { useOS } from '../store';
 import { play } from '../wm';
 
 const W = 9;
@@ -42,6 +45,11 @@ export function Minesweeper() {
   const [cells, setCells] = useState<Cell[]>(blank);
   const [state, setState] = useState<'ready' | 'play' | 'won' | 'lost'>('ready');
   const [time, setTime] = useState(0);
+  const run = useRun('minesweeper');
+  const best = useBest('minesweeper');
+  const [result, setResult] = useState<RunResult | null>(null);
+  const player = useOS((s) => s.player);
+  const loginAvailable = useOS((s) => s.loginAvailable);
   // Long-press flags a cell on touch screens.
   const press = useRef<{ timer: number; fired: boolean } | null>(null);
 
@@ -55,6 +63,7 @@ export function Minesweeper() {
     setCells(blank());
     setState('ready');
     setTime(0);
+    setResult(null);
   };
 
   const reveal = (i: number) => {
@@ -63,6 +72,7 @@ export function Minesweeper() {
     if (state === 'ready') {
       seedMines(next, i);
       setState('play');
+      run.start();
     }
     if (next[i].flag || next[i].open) return;
     if (next[i].mine) {
@@ -83,7 +93,8 @@ export function Minesweeper() {
     play('tick', { jitter: 0.15 });
     if (next.every((c) => c.open || c.mine)) {
       setState('won');
-      play('sb-gg');
+      play('welcome');
+      void run.finish(Math.max(2, time)).then(setResult);
     }
   };
 
@@ -143,8 +154,23 @@ export function Minesweeper() {
         ))}
       </div>
       <p className="mines__hint">
-        {state === 'won' ? 'You cleared the field. GG!' : state === 'lost' ? 'Boom. Click the face to try again.' : 'Right-click (or long-press) to place a flag.'}
+        {state === 'won'
+          ? result?.status === 'saved'
+            ? result.newBest
+              ? `New best time! You're #${result.rank}.`
+              : `Cleared in ${time}s. Your best: ${result.best}s.`
+            : `You cleared the field in ${time}s. GG!`
+          : state === 'lost'
+            ? 'Boom. Click the face to try again.'
+            : best !== null
+              ? `Your best: ${best}s. Right-click or long-press to flag.`
+              : 'Right-click (or long-press) to place a flag.'}
       </p>
+      {state === 'won' && !player && loginAvailable && (
+        <button type="button" className="twitch-btn" onClick={() => logIn('minesweeper')}>
+          <TwitchLogo size={14} weight="fill" /> Log in to save your time
+        </button>
+      )}
     </div>
   );
 }

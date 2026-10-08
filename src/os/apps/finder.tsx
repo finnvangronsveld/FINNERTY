@@ -280,7 +280,7 @@ export function Finder({ win }: AppProps) {
                   <>
                     <span className="file__meta">{'node' in it && it.node ? fmtDate(it.node.modified) : '--'}</span>
                     <span className="file__meta">
-                      {'app' in it ? 'Application' : { folder: 'Folder', text: 'Text document', image: 'Image', link: 'Web link' }[it.node!.kind]}
+                      {'app' in it ? 'Application' : { folder: 'Folder', text: 'Text document', image: 'Image', link: 'Web link', app: 'Application' }[it.node!.kind]}
                     </span>
                   </>
                 )}

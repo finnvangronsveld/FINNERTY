@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { Power } from '@phosphor-icons/react';
 import { sfx } from '@/lib/sfx';
+import { loadAccount, takeResume } from './account';
 import { APPS } from './apps';
 import { Desktop } from './desktop';
 import { Dock } from './dock';
@@ -200,6 +201,20 @@ export function Shell() {
     hydrateSettings();
     hydrateFs();
     sfx().prefetch();
+    const { app, status } = takeResume();
+    if (status) {
+      // Back from Twitch: skip the boot and login screens.
+      setState({ phase: 'desktop' });
+      void loadAccount().then((p) => {
+        if (status === 'ok' && p) notify(`Signed in as ${p.name}`, 'Your scores now go on the leaderboards.', 'gamecenter');
+        else notify('Twitch login didn’t work', 'Please try again in a moment.', 'gamecenter');
+        if (app && app in APPS) window.setTimeout(() => openApp(app), 300);
+      });
+    } else void loadAccount();
+    // Audio can only start after a click; unlock it on the first one.
+    const unlock = () => void sfx().unlock();
+    window.addEventListener('pointerdown', unlock, { once: true });
+    return () => window.removeEventListener('pointerdown', unlock);
   }, []);
   useLiveStatus();
   useInterfaceSounds();

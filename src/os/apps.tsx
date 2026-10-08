@@ -2,6 +2,11 @@
 import type { ComponentType } from 'react';
 import {
   Bomb,
+  ChartBar,
+  GameController,
+  GridFour,
+  Rectangle,
+  Waves,
   Calculator as CalcIcon,
   CalendarBlank,
   Compass,
@@ -9,7 +14,6 @@ import {
   Image as ImageIcon,
   Info,
   type Icon,
-  MusicNotes,
   NotePencil,
   PaintBrush,
   Smiley,
@@ -26,7 +30,11 @@ import { Minesweeper } from './apps/minesweeper';
 import { Preferences } from './apps/preferences';
 import { Preview } from './apps/preview';
 import { Sketch } from './apps/sketch';
-import { Soundboard } from './apps/soundboard';
+import { GameCenter } from './apps/gamecenter';
+import { Blocks } from './games/blocks';
+import { Bricks } from './games/bricks';
+import { Game2048 } from './games/g2048';
+import { Snake } from './games/snake';
 import { Terminal } from './apps/terminal';
 import { TextEdit } from './apps/textedit';
 import { Twitch } from './apps/twitch';
@@ -38,7 +46,11 @@ export type AppId =
   | 'textedit'
   | 'terminal'
   | 'calculator'
-  | 'soundboard'
+  | 'gamecenter'
+  | 'snake'
+  | '2048'
+  | 'bricks'
+  | 'blocks'
   | 'sketch'
   | 'minesweeper'
   | 'calendar'
@@ -71,7 +83,11 @@ export const APPS: Record<AppId, AppMeta> = {
   textedit: { id: 'textedit', name: 'TextEdit', Icon: NotePencil, from: '#ffe9a8', to: '#d9a21c', size: [560, 460], minSize: [320, 220], Component: TextEdit, blurb: 'Write and save notes' },
   terminal: { id: 'terminal', name: 'Terminal', Icon: TerminalWindow, from: '#6b6f78', to: '#16171a', size: [620, 380], minSize: [360, 200], dark: true, Component: Terminal, blurb: 'Type commands' },
   calculator: { id: 'calculator', name: 'Calculator', Icon: CalcIcon, from: '#ffcf8a', to: '#e0670f', size: [250, 380], singleton: true, resizable: false, dark: true, Component: Calculator, blurb: 'Do some maths' },
-  soundboard: { id: 'soundboard', name: 'Soundboard', Icon: MusicNotes, from: '#ffd27a', to: '#ea5a12', size: [480, 540], minSize: [360, 400], singleton: true, Component: Soundboard, blurb: 'Stream sounds on twelve keys' },
+  gamecenter: { id: 'gamecenter', name: 'Game Center', Icon: GameController, from: '#c8f0a0', to: '#2f8a2a', size: [760, 560], minSize: [420, 380], singleton: true, Component: GameCenter, blurb: 'Leaderboards and your Twitch login' },
+  snake: { id: 'snake', name: 'Snake', Icon: Waves, from: '#9fe0a0', to: '#1f8a4a', size: [460, 520], minSize: [300, 340], singleton: true, Component: Snake, blurb: 'Eat apples, don’t bite yourself' },
+  '2048': { id: '2048', name: '2048', Icon: GridFour, from: '#ffe0a0', to: '#d6890c', size: [420, 520], minSize: [300, 380], singleton: true, Component: Game2048, blurb: 'Slide and merge the tiles' },
+  bricks: { id: 'bricks', name: 'Bricks', Icon: Rectangle, from: '#ffb8c8', to: '#d6336c', size: [540, 500], minSize: [360, 340], singleton: true, Component: Bricks, blurb: 'Break every brick' },
+  blocks: { id: 'blocks', name: 'Blocks', Icon: ChartBar, from: '#b8d8ff', to: '#3a5fd6', size: [440, 580], singleton: true, resizable: false, Component: Blocks, blurb: 'Stack them, clear the lines' },
   sketch: { id: 'sketch', name: 'Sketch', Icon: PaintBrush, from: '#ffb3d1', to: '#d6336c', size: [760, 540], minSize: [420, 340], Component: Sketch, blurb: 'Draw and save pictures' },
   minesweeper: { id: 'minesweeper', name: 'Minesweeper', Icon: Bomb, from: '#b8e3a0', to: '#3a8a2a', size: [330, 430], singleton: true, resizable: false, Component: Minesweeper, blurb: 'The classic, glossier' },
   calendar: { id: 'calendar', name: 'Calendar', Icon: CalendarBlank, from: '#ffb0a8', to: '#d12a20', size: [640, 480], minSize: [420, 360], singleton: true, Component: Calendar, blurb: 'Keep track of things' },
@@ -84,7 +100,7 @@ export const DOCK_APPS: AppId[] = [
   'finder',
   'browser',
   'twitch',
-  'soundboard',
+  'gamecenter',
   'textedit',
   'terminal',
   'sketch',

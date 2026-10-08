@@ -37,7 +37,7 @@ function SpotlightPanel() {
       .filter((f) => f.node.name.toLowerCase().includes(t) || (f.node.kind === 'text' && f.node.content?.toLowerCase().includes(t)))
       .slice(0, 8)
       .map((f) => ({ type: 'file', path: f.path, label: f.node.name, sub: f.path, kind: f.node.kind, content: f.node.content }));
-    return [...apps, ...files, { type: 'web', label: `Search Wikipedia for “${q.trim()}”`, sub: 'Opens in Navigator', q: q.trim() }];
+    return [...apps, ...files, { type: 'web', label: `Search the web for “${q.trim()}”`, sub: 'Opens in Navigator', q: q.trim() }];
   }, [q]);
 
   const run = (h: Hit) => {
@@ -45,7 +45,7 @@ function SpotlightPanel() {
     if (h.type === 'app') openApp(h.id);
     if (h.type === 'file') openFile(h.path);
     if (h.type === 'web')
-      openApp('browser', { url: `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(h.q)}` });
+      openApp('browser', { q: h.q });
   };
 
   return (

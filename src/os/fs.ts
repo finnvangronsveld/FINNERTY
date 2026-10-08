@@ -5,7 +5,7 @@
  */
 import { useSyncExternalStore } from 'react';
 
-export type FileKind = 'folder' | 'text' | 'image' | 'link';
+export type FileKind = 'folder' | 'text' | 'image' | 'link' | 'app';
 
 export type FsNode = {
   name: string;
@@ -16,7 +16,7 @@ export type FsNode = {
   modified: number;
 };
 
-const KEY = 'finnos:fs:v3';
+const KEY = 'finnos:fs:v4';
 
 const WELCOME = `Welcome to FinnOS.
 
@@ -27,7 +27,8 @@ Things to try:
 - Open Twitch from the Dock to watch the stream and chat when Finn is live.
 - Press Ctrl + Space (or Alt + Space) to search for apps and files.
 - Open Terminal and type "help".
-- Make some noise in Soundboard.
+- Play Snake, Blocks, 2048, Bricks or Minesweeper (in the Games folder), log in with Twitch and get on the leaderboards in Game Center.
+- Browse the web in Navigator: it shows a clean, readable version of any page.
 - Draw something in Sketch and save it to Pictures.
 - Change the wallpaper in System Preferences.
 
@@ -51,6 +52,19 @@ function seed(): FsNode {
           { name: 'Welcome.txt', kind: 'text', content: WELCOME, modified: t },
           { name: 'Twitch', kind: 'link', content: 'https://www.twitch.tv/finnerty_', modified: t },
           { name: 'YouTube', kind: 'link', content: 'https://www.youtube.com/@xfinnerty', modified: t },
+          {
+            name: 'Games',
+            kind: 'folder',
+            modified: t,
+            children: [
+              { name: 'Game Center', kind: 'app', content: 'gamecenter', modified: t },
+              { name: 'Snake', kind: 'app', content: 'snake', modified: t },
+              { name: 'Blocks', kind: 'app', content: 'blocks', modified: t },
+              { name: '2048', kind: 'app', content: '2048', modified: t },
+              { name: 'Bricks', kind: 'app', content: 'bricks', modified: t },
+              { name: 'Minesweeper', kind: 'app', content: 'minesweeper', modified: t },
+            ],
+          },
         ],
       },
       {

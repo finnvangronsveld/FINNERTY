@@ -15,7 +15,7 @@ const CELL_H = 92;
 export function Desktop() {
   useFsVersion();
   const wallpaper = useOS((s) => s.settings.wallpaper);
-  const items: { name: string; path: string; kind: 'drive' | 'folder' | 'text' | 'image' | 'link'; content?: string }[] = [
+  const items: { name: string; path: string; kind: 'drive' | 'folder' | 'text' | 'image' | 'link' | 'app'; content?: string }[] = [
     { name: 'Finn HD', path: '/', kind: 'drive' },
     ...list('/Desktop').map((n) => ({ name: n.name, path: join('/Desktop', n.name), kind: n.kind, content: n.content })),
   ];

@@ -21,18 +21,6 @@ export const SOUNDS = [
   'notify',
   'trash',
   'toggle',
-  'sb-hello',
-  'sb-follow',
-  'sb-raid',
-  'sb-hype',
-  'sb-gg',
-  'sb-clip',
-  'sb-cozy',
-  'sb-lurk',
-  'sb-brb',
-  'sb-oops',
-  'sb-thanks',
-  'sb-night',
 ] as const;
 
 export type SoundName = (typeof SOUNDS)[number];
