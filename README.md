@@ -1,61 +1,29 @@
-# Finnerty
+# FINNERTY
 
-Nieuw ontwerp: warm charcoal, crème en vermiljoen, met een typografische homepage en eigen CSS/SVG-spelillustraties. Zie [het redesign](docs/design-redesign-2026-09-23.md) en de [oorspronkelijke designaudit](docs/design-audit-2026-09-22.md).
+The home of Finnerty: streamer, hardstyle DJ and producer. The site is a piece of
+studio hardware you switch on: a broadcast console with a scratchable turntable,
+a 16-pad drum machine with a step sequencer, and a CRT monitor that shows the
+Twitch stream when Finn is live.
 
-Een werkende lokale websitebasis voor Finnerty. Eigen Vault Points staan in een PostgreSQL-journaal; StreamElements levert uitsluitend kijktijd. **The Vault** is de gameroom: Coinflip, Dice, Orbit Slots en roulette met gratis VP, plus leaderboards (totaal en maand). Geen koop-, transfer-, prijs- of uitbetalingsfunctionaliteit; zie [The Vault](docs/vault.md) voor het juridische kader onder de Kansspelwet.
+## Sound
 
-## Lokaal starten
+Every sound is synthesized live with the Web Audio API. There are no audio files.
 
-Node.js 24 en pnpm 11.19.0:
+- `src/audio/kit.ts` holds the synthesis building blocks (envelopes, filters, saturation, noise, reverb impulse).
+- `src/audio/instruments.ts` holds the 16 drum machine voices, tuned to G minor (distorted hardstyle kick, reverse bass, supersaw stab, screech, formant "hey", air horn and more).
+- `src/audio/engine.ts` is the engine: master bus with limiter and reverb, interface sounds (key thocks, knob detents, toggle snaps, relay clunk, 50 Hz mains hum, CRT degauss and flyback whine, patch-cable plugs), the sequencer clock and the vinyl scratch.
 
-```sh
-pnpm install --frozen-lockfile
+Audio starts only after the power key is pressed (browsers require a gesture). Volume and mute are remembered per browser.
+
+## Stack
+
+Next.js 16 (App Router), React 19, plain CSS (`src/app/globals.css`), Phosphor icons.
+Fonts: Michroma (panel labels), Doto (LED displays), IBM Plex Mono (body).
+Live status comes from `/api/live`, which asks DecAPI and is cached at the CDN for 60 seconds.
+
+```bash
+pnpm install
 pnpm dev
 ```
 
-Open **http://127.0.0.1:3000**. Zonder configuratie start de ontwikkelserver in herkenbare lokale demomodus. `Demo-account` maakt een geïsoleerd fictief account met 80 demo-VP uit acht gecontroleerde kijktijddelta's. De 2 uur historische demokijktijd worden niet beloond. Linksonder kun je live/offline/onbekend en playerfouten testen.
-
-De demo gebruikt PGlite (PostgreSQL WASM) in `.local/demo-postgres`. Herladen bewaart je account via een intrekbare HttpOnly-sessie van 24 uur. Na uitloggen maakt een volgende demo-login een nieuw fictief account; echte Twitch-login gebruikt de vaste Twitch-ID. Start maar één ontwikkelserver op deze demodatabase. Dit is geen productiedatabase.
-
-## Controles
-
-```sh
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm build
-# Terwijl pnpm dev draait:
-pnpm exec playwright install chromium
-pnpm test:browser
-```
-
-Op Windows kan een reeds geïnstalleerde Chrome worden gebruikt:
-
-```powershell
-$env:PLAYWRIGHT_CHROME_PATH = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
-node node_modules/@playwright/test/cli.js test
-```
-
-De browserflows bewaren screenshots in `docs/screenshots`. Database- en providertests gebruiken uitsluitend PGlite en gecontroleerde fixtures. Gelijktijdige aanroepen zijn getest; meerdere echte PostgreSQL-processen/verbindingen en echte provideraccounts nog niet.
-
-## Echte configuratie
-
-Voor hosting: volg [het Vercel-stappenplan](docs/deployment.md). De repository bevat een vaste installatiestap, Node 24, Frankfurt als functionregio en PostgreSQL-poolbeheer voor Vercel Fluid Compute. Een deployment bouwt zonder secrets; echte login en integraties vereisen de productieconfiguratie hieronder.
-
-Kopieer `.env.example` naar `.env.local` en vul secrets alleen daar of in de secretmanager van de host in. Zet `APP_MODE=live` voor echte integraties. `APP_URL` moet exact het browserorigin zijn (scheme, host en poort). Productie vereist HTTPS en schakelt de demo altijd uit. Zonder geldige configuratie toont de site een onbekende status en weigert login; geen stille demoterugval.
-
-- Registreer Twitch-callback: `APP_URL/api/auth/callback/twitch`. Geen e-mailscope gevraagd.
-- Verifieer kanaallogin en broadcaster-ID; merknaam is geen bewijs van kanaalidentiteit.
-- `AUTH_SECRET`: 32 cryptografisch willekeurige bytes als base64, gebruikt voor AES-256-GCM. Rotatie vraagt een expliciete migratie van versleutelde tokens.
-- Bevestig PostgreSQL-engine, bestaande inhoud en backup vóór migratie. Migratie gebruikt de CLI-environment, niet automatisch `.env.local`. `pnpm db:migrate` vereist daarnaast `MIGRATION_REVIEWED=yes`. De applicatie migreert externe databases nooit bij opstarten.
-- Plan `node scripts/run-maintenance.mjs` iedere minuut met de scheduler van de host, met `APP_URL` en `JOB_SECRET`. Het script bevat geen timer. Deze planning is voorbereid, niet extern geïnstalleerd.
-- EventSub-webhook: `APP_URL/api/twitch/webhook`. Abonnementen zijn nog niet aangemaakt. HTTPS, domeinen en callbacks moeten echt worden getest.
-- StreamElements-normalisatie en kijkbeloningen blijven **gesloten** tot de read-only integratieproef identiteit, eenheid en paginering bewijst. Een JWT invullen activeert geen toekenning.
-
-## Opleverstatus
-
-Fase A is lokaal gebouwd. Fase B heeft OAuth, sessies, tokenvalidatie/refresh, gedeelde streamcache, persistente playerhost en EventSub-code. Fase C heeft migraties, read-only transport, intern adaptercontract en geteste accounting. Fase D heeft profielvoorkeuren, verwijderingsregistratie en afgeschermd basisbeheer. Fase E heeft The Vault: vier spellen met servergestuurd tempo, rondejournaal en leaderboards (standaard zichtbaar, uit te zetten). **Dit is nog geen afgeronde of gepubliceerde v1.**
-
-Nog nodig: echte Twitch-smoketest, StreamElements-contractproef en mapping/syncworker, PostgreSQL-tests met onafhankelijke workers, beheer van mappingconflicten/regels, definitief verwijderings- en bewaarbeleid, scheduler/deployment, echte player-/autoplaytest en performance op een telefoon.
-
-Zie [handoff](docs/handoff.md), [architectuur](docs/architecture.md), [integraties](docs/integrations.md), [product](docs/product.md), [The Vault](docs/vault.md) en [beslissingen](docs/decisions.md).
+The previous site (Finnertyverse with Vault Points) is preserved at the git tag `archive/finnertyverse-v1`.

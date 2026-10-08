@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX "sync_jobs_kind_unique" ON "sync_jobs" USING btree ("kind");

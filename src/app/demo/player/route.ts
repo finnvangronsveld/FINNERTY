@@ -1,8 +1,0 @@
-import { isDemo } from '@/server/config';
-export async function GET() {
-  if (!isDemo()) return new Response('Niet beschikbaar', { status: 404 });
-  return new Response(
-    `<!doctype html><html lang="nl"><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lokale playerdemo</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#171814;color:#e8e4d8;font:14px system-ui;display:grid;place-content:center;text-align:center;overflow:hidden}body:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 18px,#e8e4d806 18px 19px);opacity:1}main{position:relative}small{color:#a4a497;letter-spacing:.22em}h1{font-size:clamp(24px,5vw,42px);margin:14px 0}p{color:#a4a497}span{color:#ff6845;font-variant-numeric:tabular-nums}footer{position:absolute;bottom:16px;left:20px;right:20px;border-top:2px solid #ff684555;padding-top:9px;display:flex;justify-content:space-between;font-size:11px;color:#a4a497}</style></head><body><main><small>FINNERTY / PLAYER DEMO</small><h1>Goed dat je er bent.</h1><p>Gesimuleerd beeld · geen echte uitzending</p><span id="elapsed">00:00</span></main><footer><b>LOKALE DEMO · GEEN AUDIO</b><span>VASTE PLAYERINSTANTIE</span></footer><script>const started=Date.now();document.body.dataset.instance=crypto.randomUUID();setInterval(()=>{const s=Math.floor((Date.now()-started)/1000);document.getElementById('elapsed').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},1000);</script></body></html>`,
-    { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } },
-  );
-}
