@@ -71,7 +71,7 @@ export const APPS: Record<AppId, AppMeta> = {
   textedit: { id: 'textedit', name: 'TextEdit', Icon: NotePencil, from: '#ffe9a8', to: '#d9a21c', size: [560, 460], minSize: [320, 220], Component: TextEdit, blurb: 'Write and save notes' },
   terminal: { id: 'terminal', name: 'Terminal', Icon: TerminalWindow, from: '#6b6f78', to: '#16171a', size: [620, 380], minSize: [360, 200], dark: true, Component: Terminal, blurb: 'Type commands' },
   calculator: { id: 'calculator', name: 'Calculator', Icon: CalcIcon, from: '#ffcf8a', to: '#e0670f', size: [250, 380], singleton: true, resizable: false, dark: true, Component: Calculator, blurb: 'Do some maths' },
-  soundboard: { id: 'soundboard', name: 'Soundboard', Icon: MusicNotes, from: '#ffd27a', to: '#ea5a12', size: [460, 470], minSize: [360, 380], singleton: true, Component: Soundboard, blurb: 'Stream sounds on twelve keys' },
+  soundboard: { id: 'soundboard', name: 'Soundboard', Icon: MusicNotes, from: '#ffd27a', to: '#ea5a12', size: [480, 540], minSize: [360, 400], singleton: true, Component: Soundboard, blurb: 'Stream sounds on twelve keys' },
   sketch: { id: 'sketch', name: 'Sketch', Icon: PaintBrush, from: '#ffb3d1', to: '#d6336c', size: [760, 540], minSize: [420, 340], Component: Sketch, blurb: 'Draw and save pictures' },
   minesweeper: { id: 'minesweeper', name: 'Minesweeper', Icon: Bomb, from: '#b8e3a0', to: '#3a8a2a', size: [330, 430], singleton: true, resizable: false, Component: Minesweeper, blurb: 'The classic, glossier' },
   calendar: { id: 'calendar', name: 'Calendar', Icon: CalendarBlank, from: '#ffb0a8', to: '#d12a20', size: [640, 480], minSize: [420, 360], singleton: true, Component: Calendar, blurb: 'Keep track of things' },

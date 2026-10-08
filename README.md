@@ -1,26 +1,31 @@
-# FINNERTY
+# FinnOS
 
-The home of Finnerty, streamer on Twitch as `finnerty_`. The site is a cozy streamer
-desk seen from above: a notebook with a flippable polaroid, an ON AIR light box, a tablet
-that shows the stream when Finn is live, a Stream Deck-style soundboard, sticky-note links
-and a steaming mug. Day and night themes; the room starts dark until you flip the light switch.
+Finnerty's site is a full-screen desktop operating system in the browser, in glossy
+2010s (Aqua-era) style. Boot it, log in, and use it like a computer.
 
-## Sound
+## What you can do
 
-All sounds are CC0 samples by [Kenney](https://kenney.nl) (Interface Sounds, UI Audio,
-Music Jingles), trimmed, level-matched and converted to MP3 in `public/sounds/`
-(about 180 KB in total). `src/lib/sfx.ts` prefetches them, decodes them after the first
-click (browsers require a gesture) and plays them through Web Audio. Mute is remembered.
+- Windows you can drag, resize, minimize into the Dock, zoom and close; a menu bar with
+  working menus; a Dock with magnification, running-app lights and a Trash.
+- A desktop and a virtual file system (Desktop, Documents, Pictures, Trash) stored in the
+  visitor's browser: create, rename, move, trash and restore files and folders.
+- Spotlight search (Ctrl + Space or Alt + Space), Growl-style notifications, sleep, restart,
+  shut down and log out.
+- Apps: Finder, Navigator (web browser), Twitch (stream plus chat), TextEdit, Terminal,
+  Calculator, Soundboard, Sketch, Minesweeper, Calendar, Preview, System Preferences, About.
 
-## Stack
+Keyboard: Alt + W closes a window, Alt + M minimizes, Alt + Q quits the app, Alt + N opens a new window.
 
-Next.js 16 (App Router), React 19, plain CSS (`src/app/globals.css`), Phosphor icons.
-Fonts: Shantell Sans (handwriting, using its informality axis) and Courier Prime (typed labels).
-`/api/live` asks DecAPI for live status and the Twitch avatar, cached at the CDN for 60 seconds.
+## Code
+
+- `src/os/store.ts` session state, `src/os/wm.ts` window manager, `src/os/fs.ts` file system.
+- `src/os/shell.tsx` boot, login and the desktop; `menubar.tsx`, `dock.tsx`, `desktop.tsx`, `window.tsx`, `overlays.tsx`.
+- `src/os/apps/*` one file per app; `src/os/apps.tsx` is the registry.
+- `src/app/api/live/route.ts` live status and avatar via DecAPI, cached for 60 seconds.
+
+Sounds are CC0 samples by [Kenney](https://kenney.nl), trimmed and level-matched in `public/sounds/`.
 
 ```bash
 pnpm install
 pnpm dev
 ```
-
-Earlier versions are preserved at git tag `archive/finnertyverse-v1` (Vault site) and in history.

@@ -7,7 +7,7 @@ const neon = Yellowtail({ weight: '400', subsets: ['latin'], variable: '--font-n
 export const metadata: Metadata = {
   metadataBase: new URL('https://finnerty.vercel.app'),
   title: 'Finnerty',
-  description: 'Finnerty streams on Twitch as finnerty_. Pull up a chair and hang out with chat.',
+  description: 'FinnOS: Finnerty’s corner of the internet, built as a glossy desktop computer. Watch the stream, play with the soundboard and poke around.',
   openGraph: {
     title: 'Finnerty',
     description: 'Pull up a chair and hang out with chat. Live on Twitch as finnerty_.',

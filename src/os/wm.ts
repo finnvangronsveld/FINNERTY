@@ -9,7 +9,7 @@ export const MENU_H = 24;
 export function desktopBounds() {
   const dock = getState().settings.dockSize + 26;
   const w = window.innerWidth;
-  const h = window.innerHeight - MENU_H - (isCompact() ? 0 : dock);
+  const h = window.innerHeight - MENU_H - (isCompact() ? 66 : dock);
   return { w, h, compact: isCompact() };
 }
 
@@ -42,8 +42,8 @@ export function openApp(app: AppId, data?: Record<string, string>, title?: strin
   const w = Math.min(dw, b.w - 20);
   const h = Math.min(dh, b.h - 20);
   const n = s.windows.length % 8;
-  const x = Math.max(10, Math.round((b.w - w) / 2 - 120 + n * 28 + (Math.random() * 40 - 20)));
-  const y = Math.max(8, Math.round((b.h - h) / 2 - 60 + n * 24));
+  const x = Math.max(10, Math.min(b.w - w - 10, Math.round((b.w - w) / 2 - 160 + n * 44 + (Math.random() * 30 - 15))));
+  const y = Math.max(8, Math.min(b.h - h - 8, Math.round((b.h - h) / 2 - 70 + n * 32)));
   const id = uid();
   const z = s.z + 1;
   const win: WinState = {

@@ -177,13 +177,11 @@ function useMenus(): Menu[] {
 }
 
 function Clock() {
-  const [now, setNow] = useState<Date | null>(null);
+  const [now, setNow] = useState(() => new Date());
   useEffect(() => {
-    setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 10_000);
     return () => clearInterval(id);
   }, []);
-  if (!now) return null;
   return (
     <button type="button" className="mb__status" onClick={() => openApp('calendar')}>
       {now.toLocaleDateString('en-GB', { weekday: 'short' })}{' '}

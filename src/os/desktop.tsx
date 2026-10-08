@@ -15,21 +15,29 @@ const CELL_H = 92;
 export function Desktop() {
   useFsVersion();
   const wallpaper = useOS((s) => s.settings.wallpaper);
-  const items = [{ name: 'Finn HD', path: '/', kind: 'drive' as const }].concat(
-    list('/Desktop').map((n) => ({ name: n.name, path: join('/Desktop', n.name), kind: n.kind as never })),
-  );
+  const items: { name: string; path: string; kind: 'drive' | 'folder' | 'text' | 'image' | 'link'; content?: string }[] = [
+    { name: 'Finn HD', path: '/', kind: 'drive' },
+    ...list('/Desktop').map((n) => ({ name: n.name, path: join('/Desktop', n.name), kind: n.kind, content: n.content })),
+  ];
   const [selected, setSelected] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [ctx, setCtx] = useState<Ctx>(null);
-  const [pos, setPos] = useState<Pos>({});
+  const [pos, setPos] = useState<Pos>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(POS_KEY) ?? '{}');
+    } catch {
+      return {};
+    }
+  });
+  const [size, setSize] = useState({ w: 1200, h: 700 });
   const area = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    try {
-      setPos(JSON.parse(localStorage.getItem(POS_KEY) ?? '{}'));
-    } catch {
-      /* ignore */
-    }
+    const el = area.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setSize({ w: el.clientWidth, h: el.clientHeight }));
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   const savePos = (p: Pos) => {
@@ -67,12 +75,10 @@ export function Desktop() {
   // Default layout: a column from the top right, like the classic desktop.
   const placeOf = (i: number, path: string) => {
     if (pos[path]) return pos[path];
-    const h = area.current?.clientHeight ?? 700;
-    const perCol = Math.max(1, Math.floor((h - 20) / CELL_H));
+    const perCol = Math.max(1, Math.floor((size.h - 20) / CELL_H));
     const col = Math.floor(i / perCol);
     const row = i % perCol;
-    const w = area.current?.clientWidth ?? 1200;
-    return { x: w - CELL_W - 16 - col * CELL_W, y: 14 + row * CELL_H };
+    return { x: size.w - CELL_W - 16 - col * CELL_W, y: 14 + row * CELL_H };
   };
 
   const dragIcon = (path: string, start: { x: number; y: number }) => (e: React.PointerEvent) => {
@@ -145,7 +151,7 @@ export function Desktop() {
             aria-label={it.name}
             onKeyDown={(e) => e.key === 'Enter' && !renaming && openFile(it.path)}
           >
-            <FileIcon kind={it.kind} name={it.name} size={54} />
+            <FileIcon kind={it.kind} name={it.name} size={54} content={it.content} />
             {renaming === it.path ? (
               <input
                 className="dicon__rename"

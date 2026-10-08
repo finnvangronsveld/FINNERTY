@@ -15,17 +15,17 @@ type Hit =
 
 export function Spotlight() {
   const open = useOS((s) => s.spotlight);
+  return open ? <SpotlightPanel /> : null;
+}
+
+function SpotlightPanel() {
   const [q, setQ] = useState('');
   const [sel, setSel] = useState(0);
   const input = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open) {
-      setQ('');
-      setSel(0);
-      window.setTimeout(() => input.current?.focus(), 10);
-    }
-  }, [open]);
+    input.current?.focus();
+  }, []);
 
   const hits = useMemo<Hit[]>(() => {
     const t = q.trim().toLowerCase();
@@ -48,7 +48,6 @@ export function Spotlight() {
       openApp('browser', { url: `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(h.q)}` });
   };
 
-  if (!open) return null;
   return (
     <div className="spot-backdrop" onPointerDown={() => setState({ spotlight: false })}>
       <div className="spot" role="dialog" aria-label="Spotlight" onPointerDown={(e) => e.stopPropagation()}>

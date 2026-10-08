@@ -16,7 +16,7 @@ export type FsNode = {
   modified: number;
 };
 
-const KEY = 'finnos:fs:v2';
+const KEY = 'finnos:fs:v3';
 
 const WELCOME = `Welcome to FinnOS.
 
@@ -25,7 +25,7 @@ This is Finnerty's corner of the internet, built like a computer.
 Things to try:
 - Drag windows around, resize them from the corner, and use the yellow and green buttons.
 - Open Twitch from the Dock to watch the stream and chat when Finn is live.
-- Press Ctrl + Space (or Cmd + Space) to search for apps and files.
+- Press Ctrl + Space (or Alt + Space) to search for apps and files.
 - Open Terminal and type "help".
 - Make some noise in Soundboard.
 - Draw something in Sketch and save it to Pictures.

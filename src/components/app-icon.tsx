@@ -10,7 +10,7 @@ export function AppIcon({
   Icon: Icon;
   from: string;
   to: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
 }) {
   return (
     <span
