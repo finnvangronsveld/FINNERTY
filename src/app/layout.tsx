@@ -1,14 +1,8 @@
 import type { Metadata, Viewport } from 'next';
-import { Courier_Prime, Shantell_Sans } from 'next/font/google';
+import { Yellowtail } from 'next/font/google';
 import './globals.css';
 
-const hand = Shantell_Sans({
-  subsets: ['latin'],
-  variable: '--font-hand',
-  display: 'swap',
-  axes: ['INFM', 'BNCE'],
-});
-const typed = Courier_Prime({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-typed', display: 'swap' });
+const neon = Yellowtail({ weight: '400', subsets: ['latin'], variable: '--font-neon', display: 'swap' });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://finnerty.vercel.app'),
@@ -32,7 +26,7 @@ const themeScript = `(function(){try{var t=localStorage.getItem('finnerty:theme'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${hand.variable} ${typed.variable}`} suppressHydrationWarning>
+    <html lang="en" className={neon.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

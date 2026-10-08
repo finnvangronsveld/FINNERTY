@@ -64,12 +64,8 @@ export function DeskProvider({ children }: { children: React.ReactNode }) {
     const s = sfx();
     if (quiet) s.setMuted(true);
     void s.unlock().then(() => {
-      s.play('lamp');
-      // Objects land on the desk in sequence; see the --drop delays in CSS.
-      [0.55, 0.75, 0.95, 1.15].forEach((d, i) =>
-        s.play(i % 2 ? 'drop-b' : 'drop-a', { delay: d, gain: 0.7, jitter: 0.05 }),
-      );
-      s.play('welcome', { delay: 1.5, gain: 0.6 });
+      s.play('screen-on', { gain: 0.8 });
+      s.play('welcome', { delay: 0.5, gain: 0.7 });
     });
     setAwake(true);
     document.documentElement.dataset.awake = 'true';
