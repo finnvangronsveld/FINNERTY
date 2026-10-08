@@ -1,33 +1,50 @@
 import { TWITCH_LOGIN } from '@/lib/links';
 
 /**
- * Live status via DecAPI (public Twitch helper, no credentials needed).
+ * Live status and avatar via DecAPI (public Twitch helper, no credentials needed).
  * Cached at the CDN for a minute so Twitch never sees per-visitor traffic.
  */
-export async function GET() {
-  let body: { live: boolean | null; uptime: string | null } = { live: null, uptime: null };
+async function decapi(path: string) {
   try {
-    const res = await fetch(`https://decapi.me/twitch/uptime/${TWITCH_LOGIN}`, {
+    const res = await fetch(`https://decapi.me/twitch/${path}/${TWITCH_LOGIN}`, {
       signal: AbortSignal.timeout(4000),
       cache: 'no-store',
     });
     const text = (await res.text()).trim();
-    if (res.ok && text) {
-      if (/offline/i.test(text)) body = { live: false, uptime: null };
-      else if (/error|not found|invalid/i.test(text)) body = { live: null, uptime: null };
-      else body = { live: true, uptime: compact(text) };
-    }
+    return res.ok ? text : null;
   } catch {
-    /* keep the unknown state */
+    return null;
   }
-  return Response.json(body, {
-    headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
-  });
 }
 
-/** "2 hours, 5 minutes, 3 seconds" -> "2H 05M" */
+export async function GET() {
+  const [uptime, avatar] = await Promise.all([decapi('uptime'), decapi('avatar')]);
+
+  let live: boolean | null = null;
+  let up: string | null = null;
+  if (uptime) {
+    if (/offline/i.test(uptime)) live = false;
+    else if (!/error|not found|invalid/i.test(uptime)) {
+      live = true;
+      up = compact(uptime);
+    }
+  }
+
+  // Only accept Twitch's own image CDN.
+  const safeAvatar =
+    avatar && /^https:\/\/static-cdn\.jtvnw\.net\/[\w\-./]+\.(png|jpe?g|webp)$/i.test(avatar)
+      ? avatar
+      : null;
+
+  return Response.json(
+    { live, uptime: up, avatar: safeAvatar },
+    { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' } },
+  );
+}
+
+/** "2 hours, 5 minutes, 3 seconds" -> "2h 05m" */
 function compact(text: string) {
   const h = /(\d+)\s*hour/.exec(text)?.[1];
   const m = /(\d+)\s*minute/.exec(text)?.[1] ?? '0';
-  return h ? `${h}H ${m.padStart(2, '0')}M` : `${m}M`;
+  return h ? `${h}h ${m.padStart(2, '0')}m` : `${m}m`;
 }

@@ -1,0 +1,3 @@
+Sound effects by Kenney (https://kenney.nl): Interface Sounds, UI Audio and Music Jingles.
+License: Creative Commons Zero (CC0 1.0), https://creativecommons.org/publicdomain/zero/1.0/
+Files were trimmed, level-matched and converted to MP3.

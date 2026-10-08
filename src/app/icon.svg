@@ -1,15 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <defs>
-    <linearGradient id="m" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#3a3d42"/>
-      <stop offset="1" stop-color="#1b1d20"/>
-    </linearGradient>
-    <radialGradient id="l" cx=".5" cy=".45" r=".5">
-      <stop offset="0" stop-color="#ffd2a1"/>
-      <stop offset=".45" stop-color="#ff8a1f"/>
-      <stop offset="1" stop-color="#b84d00"/>
-    </radialGradient>
-  </defs>
-  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#m)"/>
-  <circle cx="32" cy="32" r="13" fill="url(#l)"/>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#fff6c9"/>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="none" stroke="#e8d27a" stroke-width="2"/>
+  <text x="32" y="45" text-anchor="middle" font-family="Comic Sans MS, Segoe Print, cursive" font-size="36" font-weight="700" fill="#6d4ad6">F</text>
 </svg>
