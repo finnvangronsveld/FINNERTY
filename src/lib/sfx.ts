@@ -9,15 +9,17 @@ export const SOUNDS = [
   'hover',
   'press',
   'release',
-  'lamp',
+  'tick',
   'drop-a',
-  'drop-b',
   'screen-on',
   'screen-off',
   'welcome',
-  'flip',
-  'peel',
-  'link',
+  'startup',
+  'open',
+  'close',
+  'error',
+  'notify',
+  'trash',
   'toggle',
   'sb-hello',
   'sb-follow',
@@ -49,6 +51,7 @@ class Sfx {
   private lastHover = 0;
   private listeners = new Set<() => void>();
   state: State = { ready: false, muted: false };
+  private volume = 0.9;
 
   constructor() {
     if (typeof window === 'undefined') return;
@@ -99,7 +102,7 @@ class Sfx {
     const ctx = new Ctor();
     this.ctx = ctx;
     this.master = ctx.createGain();
-    this.master.gain.value = this.state.muted ? 0 : 0.9;
+    this.master.gain.value = this.state.muted ? 0 : this.volume;
     this.master.connect(ctx.destination);
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) void ctx.suspend();
@@ -140,9 +143,16 @@ class Sfx {
     this.play('hover', { gain: 0.8, jitter: 0.06 });
   }
 
+  setVolume(v: number) {
+    this.volume = Math.max(0, Math.min(1, v));
+    if (this.master && this.ctx && !this.state.muted) {
+      this.master.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.03);
+    }
+  }
+
   setMuted(muted: boolean) {
     if (this.master && this.ctx) {
-      this.master.gain.setTargetAtTime(muted ? 0 : 0.9, this.ctx.currentTime, 0.03);
+      this.master.gain.setTargetAtTime(muted ? 0 : this.volume, this.ctx.currentTime, 0.03);
     }
     try {
       localStorage.setItem(KEY, muted ? 'off' : 'on');
