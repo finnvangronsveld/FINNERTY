@@ -8,6 +8,7 @@ import { useOS } from '../store';
 export function Twitch() {
   const live = useOS((s) => s.live);
   const uptime = useOS((s) => s.uptime);
+  const nowPlaying = useOS((s) => s.nowPlaying);
   const [chat, setChat] = useState(true);
   const host = typeof window === 'undefined' ? 'localhost' : window.location.hostname;
 
@@ -19,6 +20,7 @@ export function Twitch() {
           {live ? `Live${uptime ? ` for ${uptime}` : ''}` : live === false ? 'Offline' : 'Checking'}
         </span>
         <span className="twitch__name">{TWITCH_LOGIN}</span>
+        {nowPlaying && <span className="twitch__playing">Playing {nowPlaying}</span>}
         <div className="twitch__actions">
           <button type="button" className="tb-btn tb-btn--dark" data-on={chat} onClick={() => setChat(!chat)}>
             <ChatCircleText size={14} weight="fill" /> Chat

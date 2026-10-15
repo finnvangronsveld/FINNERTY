@@ -8,7 +8,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Not available' }, { status: 404 });
   }
   const name = (new URL(request.url).searchParams.get('name') ?? 'DevPlayer').replace(/[^\w]/g, '').slice(0, 20) || 'DevPlayer';
-  const player: Player = { id: `dev-${name.toLowerCase()}`, login: name.toLowerCase(), name, avatar: null };
+  // ?as=owner signs in as Finn himself, to try the Admin app locally (dev database only).
+  const owner = new URL(request.url).searchParams.get('as') === 'owner';
+  const player: Player = owner
+    ? { id: '442232328', login: 'finnerty_', name: 'Finnerty_', avatar: null }
+    : { id: `dev-${name.toLowerCase()}`, login: name.toLowerCase(), name, avatar: null };
   await db()`
     INSERT INTO finnos_players (twitch_id, login, display_name)
     VALUES (${player.id}, ${player.login}, ${player.name})

@@ -16,7 +16,7 @@ export type FsNode = {
   modified: number;
 };
 
-const KEY = 'finnos:fs:v4';
+const KEY = 'finnos:fs:v5';
 
 const WELCOME = `Welcome to FinnOS.
 
@@ -29,6 +29,8 @@ Things to try:
 - Open Terminal and type "help".
 - Play Snake, Blocks, 2048, Bricks or Minesweeper (in the Games folder), log in with Twitch and get on the leaderboards in Game Center.
 - Browse the web in Navigator: it shows a clean, readable version of any page.
+- Watch clips and past streams in Theater, hang out in the Lobby, and sign the Guestbook.
+- Collect achievements and win the game of the week in Game Center.
 - Draw something in Sketch and save it to Pictures.
 - Change the wallpaper in System Preferences.
 
@@ -52,6 +54,8 @@ function seed(): FsNode {
           { name: 'Welcome.txt', kind: 'text', content: WELCOME, modified: t },
           { name: 'Twitch', kind: 'link', content: 'https://www.twitch.tv/finnerty_', modified: t },
           { name: 'YouTube', kind: 'link', content: 'https://www.youtube.com/@xfinnerty', modified: t },
+          { name: 'Guestbook', kind: 'app', content: 'guestbook', modified: t },
+          { name: 'Emotes', kind: 'app', content: 'emotes', modified: t },
           {
             name: 'Games',
             kind: 'folder',

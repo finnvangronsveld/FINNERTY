@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { APPS, AppId, AppProps } from '../apps';
 import { basename, getNode, join, list, makeFolder, parent, split, trash, writeFile } from '../fs';
 import { getState } from '../store';
+import { claim } from '../achieve';
 import { close, openApp, openFile, play } from '../wm';
 
 type Line = { kind: 'in' | 'out' | 'err'; text: string };
@@ -163,6 +164,7 @@ export function Terminal({ win }: AppProps) {
         break;
       case 'sudo':
         err('finn is not in the sudoers file. This incident will be reported.');
+        claim('terminal-sudo');
         break;
       case 'neofetch': {
         const s = getState();

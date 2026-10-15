@@ -6,6 +6,7 @@ import { openApp } from '../wm';
 export function About() {
   const avatar = useOS((s) => s.avatar);
   const live = useOS((s) => s.live);
+  const nowPlaying = useOS((s) => s.nowPlaying);
   return (
     <div className="about">
       <div className="about__avatar">
@@ -24,6 +25,12 @@ export function About() {
       <dl className="about__specs">
         <dt>Twitch</dt>
         <dd>{live ? 'Live now' : live === false ? 'Offline' : 'Checking'}</dd>
+        {nowPlaying && (
+          <>
+            <dt>Playing</dt>
+            <dd>{nowPlaying}</dd>
+          </>
+        )}
         <dt>Channel</dt>
         <dd>twitch.tv/{TWITCH_LOGIN}</dd>
         <dt>YouTube</dt>

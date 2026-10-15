@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Yellowtail } from 'next/font/google';
 import './globals.css';
 import './games.css';
+import './community.css';
 
 const neon = Yellowtail({ weight: '400', subsets: ['latin'], variable: '--font-neon', display: 'swap' });
 

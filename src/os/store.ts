@@ -58,6 +58,8 @@ export type OSState = {
   dialog: Dialog | null;
   player: Player | null;
   loginAvailable: boolean;
+  admin: boolean;
+  nowPlaying: string | null;
 };
 
 const SETTINGS_KEY = 'finnos:settings';
@@ -93,6 +95,8 @@ let state: OSState = {
   dialog: null,
   player: null,
   loginAvailable: false,
+  admin: false,
+  nowPlaying: null,
 };
 
 const listeners = new Set<() => void>();

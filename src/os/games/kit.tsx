@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Crown, TwitchLogo } from '@phosphor-icons/react';
 import { GAMES, GameId } from '@/lib/games';
+import { celebrate } from '../achieve';
 import { logIn } from '../account';
 import { getState, notify, useOS } from '../store';
 import { play } from '../wm';
@@ -39,6 +40,8 @@ export function useRun(game: GameId) {
       token.current = null;
       const d = await r.json();
       if (!r.ok) return { status: 'error', message: d.error ?? 'Score not saved.' };
+      celebrate(d.achievements);
+      if (d.weekly && d.newBest) notify('Game of the week', 'Your score counts for this week’s tournament!', 'gamecenter');
       if (d.newBest) {
         play('notify');
         notify('New high score!', `${GAMES[game].name}: ${score.toLocaleString('en-GB')} ${GAMES[game].unit}. Rank #${d.rank}.`, 'gamecenter');

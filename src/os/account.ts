@@ -7,8 +7,8 @@ const RESUME = 'finnos:resume';
 export async function loadAccount() {
   try {
     const r = await fetch('/api/auth/me', { cache: 'no-store' });
-    const d = (await r.json()) as { player: Player | null; loginAvailable: boolean };
-    setState({ player: d.player, loginAvailable: d.loginAvailable });
+    const d = (await r.json()) as { player: Player | null; loginAvailable: boolean; admin?: boolean };
+    setState({ player: d.player, loginAvailable: d.loginAvailable, admin: !!d.admin });
     return d.player;
   } catch {
     return null;
@@ -28,7 +28,7 @@ export function logIn(app?: AppId) {
 
 export async function logOut() {
   await fetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
-  setState({ player: null });
+  setState({ player: null, admin: false });
   notify('Logged out', 'Your scores stay on the leaderboards.', 'gamecenter');
 }
 

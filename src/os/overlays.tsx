@@ -5,7 +5,7 @@ import { AppIcon } from '@/components/app-icon';
 import { APPS, AppId } from './apps';
 import { FileIcon } from './file-icon';
 import { walk } from './fs';
-import { dismissNote, setState, useOS } from './store';
+import { dismissNote, getState, setState, useOS } from './store';
 import { openApp, openFile } from './wm';
 
 type Hit =
@@ -31,6 +31,7 @@ function SpotlightPanel() {
     const t = q.trim().toLowerCase();
     if (!t) return [];
     const apps: Hit[] = Object.values(APPS)
+      .filter((a) => !a.adminOnly || getState().admin)
       .filter((a) => a.name.toLowerCase().includes(t) || a.blurb.toLowerCase().includes(t))
       .map((a) => ({ type: 'app', id: a.id, label: a.name, sub: a.blurb }));
     const files: Hit[] = walk()

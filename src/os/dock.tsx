@@ -11,14 +11,16 @@ import { focus, openApp, play, restore } from './wm';
 export function Dock() {
   const windows = useOS((s) => s.windows);
   const settings = useOS((s) => s.settings);
+  const admin = useOS((s) => s.admin);
   useFsVersion();
   const trashFull = list('/Trash').length > 0;
   const bar = useRef<HTMLDivElement>(null);
   const [bouncing, setBouncing] = useState<string | null>(null);
 
   const running = new Set(windows.map((w) => w.app));
-  const extra = [...running].filter((a) => !DOCK_APPS.includes(a));
-  const items: AppId[] = [...DOCK_APPS, ...extra];
+  const base: AppId[] = admin ? [...DOCK_APPS, 'admin'] : DOCK_APPS;
+  const extra = [...running].filter((a) => !base.includes(a));
+  const items: AppId[] = [...base, ...extra];
 
   // Magnification: icons near the pointer grow, like the real thing.
   const onMove = (e: React.PointerEvent) => {

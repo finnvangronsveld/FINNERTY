@@ -1,5 +1,6 @@
 'use client';
 import { sfx } from '@/lib/sfx';
+import { trackApp } from './achieve';
 import { APPS, AppId } from './apps';
 import { basename, getNode } from './fs';
 import { getState, notify, setState, uid, WinState } from './store';
@@ -61,6 +62,7 @@ export function openApp(app: AppId, data?: Record<string, string>, title?: strin
   };
   setState({ windows: [...s.windows, win], focused: id, z });
   play('open', { jitter: 0.05 });
+  trackApp(app);
   return id;
 }
 

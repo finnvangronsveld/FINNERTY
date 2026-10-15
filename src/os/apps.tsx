@@ -1,6 +1,11 @@
 'use client';
 import type { ComponentType } from 'react';
 import {
+  BookOpenText,
+  ChatsCircle,
+  FilmStrip,
+  ShieldStar,
+  SmileyWink as SmileyIcon,
   Bomb,
   ChartBar,
   GameController,
@@ -30,7 +35,12 @@ import { Minesweeper } from './apps/minesweeper';
 import { Preferences } from './apps/preferences';
 import { Preview } from './apps/preview';
 import { Sketch } from './apps/sketch';
+import { Admin } from './apps/admin';
+import { Emotes } from './apps/emotes';
 import { GameCenter } from './apps/gamecenter';
+import { Guestbook } from './apps/guestbook';
+import { Lobby } from './apps/lobby';
+import { Theater } from './apps/theater';
 import { Blocks } from './games/blocks';
 import { Bricks } from './games/bricks';
 import { Game2048 } from './games/g2048';
@@ -47,6 +57,11 @@ export type AppId =
   | 'terminal'
   | 'calculator'
   | 'gamecenter'
+  | 'theater'
+  | 'emotes'
+  | 'guestbook'
+  | 'lobby'
+  | 'admin'
   | 'snake'
   | '2048'
   | 'bricks'
@@ -70,6 +85,8 @@ export type AppMeta = {
   minSize?: [number, number];
   singleton?: boolean;
   resizable?: boolean;
+  /** Only shown to Finn (the server checks too). */
+  adminOnly?: boolean;
   /** Dark, unified title bar (brushed look) instead of the light Aqua one. */
   dark?: boolean;
   Component: ComponentType<AppProps>;
@@ -83,6 +100,11 @@ export const APPS: Record<AppId, AppMeta> = {
   textedit: { id: 'textedit', name: 'TextEdit', Icon: NotePencil, from: '#ffe9a8', to: '#d9a21c', size: [560, 460], minSize: [320, 220], Component: TextEdit, blurb: 'Write and save notes' },
   terminal: { id: 'terminal', name: 'Terminal', Icon: TerminalWindow, from: '#6b6f78', to: '#16171a', size: [620, 380], minSize: [360, 200], dark: true, Component: Terminal, blurb: 'Type commands' },
   calculator: { id: 'calculator', name: 'Calculator', Icon: CalcIcon, from: '#ffcf8a', to: '#e0670f', size: [250, 380], singleton: true, resizable: false, dark: true, Component: Calculator, blurb: 'Do some maths' },
+  theater: { id: 'theater', name: 'Theater', Icon: FilmStrip, from: '#9a9da6', to: '#2a2c33', size: [900, 600], minSize: [460, 340], singleton: true, dark: true, Component: Theater, blurb: 'Clips and past streams' },
+  emotes: { id: 'emotes', name: 'Emotes', Icon: SmileyIcon, from: '#ffe08a', to: '#e0a10e', size: [640, 460], minSize: [420, 320], singleton: true, Component: Emotes, blurb: 'The channel’s emotes' },
+  guestbook: { id: 'guestbook', name: 'Guestbook', Icon: BookOpenText, from: '#e8c2a0', to: '#8a4f24', size: [520, 600], minSize: [360, 380], singleton: true, Component: Guestbook, blurb: 'Sign it, leave a message' },
+  lobby: { id: 'lobby', name: 'Lobby', Icon: ChatsCircle, from: '#a6f0b0', to: '#1f9a4a', size: [420, 560], minSize: [300, 340], singleton: true, Component: Lobby, blurb: 'Chat with everyone on the site' },
+  admin: { id: 'admin', name: 'Admin', Icon: ShieldStar, from: '#ffb3a8', to: '#b8160f', size: [600, 520], singleton: true, resizable: false, adminOnly: true, Component: Admin, blurb: 'Announcements and moderation' },
   gamecenter: { id: 'gamecenter', name: 'Game Center', Icon: GameController, from: '#c8f0a0', to: '#2f8a2a', size: [760, 560], minSize: [420, 380], singleton: true, Component: GameCenter, blurb: 'Leaderboards and your Twitch login' },
   snake: { id: 'snake', name: 'Snake', Icon: Waves, from: '#9fe0a0', to: '#1f8a4a', size: [460, 520], minSize: [300, 340], singleton: true, Component: Snake, blurb: 'Eat apples, don’t bite yourself' },
   '2048': { id: '2048', name: '2048', Icon: GridFour, from: '#ffe0a0', to: '#d6890c', size: [420, 520], minSize: [300, 380], singleton: true, Component: Game2048, blurb: 'Slide and merge the tiles' },
@@ -100,12 +122,12 @@ export const DOCK_APPS: AppId[] = [
   'finder',
   'browser',
   'twitch',
+  'theater',
+  'lobby',
   'gamecenter',
   'textedit',
   'terminal',
   'sketch',
-  'calculator',
   'calendar',
-  'minesweeper',
   'preferences',
 ];

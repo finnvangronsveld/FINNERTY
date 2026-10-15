@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { Power } from '@phosphor-icons/react';
 import { sfx } from '@/lib/sfx';
+import { claim } from './achieve';
 import { loadAccount, takeResume } from './account';
 import { APPS } from './apps';
 import { Desktop } from './desktop';
@@ -103,6 +104,41 @@ function Off() {
       </button>
     </div>
   );
+}
+
+/** Finn's announcements pop up once for every visitor; "now playing" shows in the Twitch app. */
+function useAnnouncements() {
+  useEffect(() => {
+    let alive = true;
+    const load = () =>
+      fetch('/api/announcement')
+        .then((r) => r.json())
+        .then((d: { announcement: { id: number; message: string } | null; nowPlaying: string | null }) => {
+          if (!alive) return;
+          setState({ nowPlaying: d.nowPlaying });
+          const a = d.announcement;
+          if (!a || getState().phase !== 'desktop') return;
+          let seen = 0;
+          try {
+            seen = Number(localStorage.getItem('finnos:announcement') ?? 0);
+            localStorage.setItem('finnos:announcement', String(a.id));
+          } catch {
+            /* ignore */
+          }
+          if (a.id !== seen) {
+            play('notify');
+            notify('Message from Finnerty', a.message, 'twitch');
+          }
+        })
+        .catch(() => undefined);
+    const first = window.setTimeout(load, 2500);
+    const id = setInterval(load, 60_000);
+    return () => {
+      alive = false;
+      clearTimeout(first);
+      clearInterval(id);
+    };
+  }, []);
 }
 
 function useLiveStatus() {
@@ -217,7 +253,15 @@ export function Shell() {
     return () => window.removeEventListener('pointerdown', unlock);
   }, []);
   useLiveStatus();
+  useAnnouncements();
   useInterfaceSounds();
+
+  // Night Owl: using FinnOS between 2 and 5 in the morning.
+  const player = useOS((s) => s.player);
+  useEffect(() => {
+    const h = new Date().getHours();
+    if (player && phase === 'desktop' && h >= 2 && h < 5) claim('night-owl');
+  }, [player, phase]);
   useShortcuts();
 
   // Keep zoomed windows filling the screen when the browser window changes size.

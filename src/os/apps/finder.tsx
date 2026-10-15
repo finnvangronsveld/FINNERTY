@@ -17,7 +17,7 @@ import { AppIcon } from '@/components/app-icon';
 import { APPS, AppId, AppProps } from '../apps';
 import { FileIcon } from '../file-icon';
 import { basename, emptyTrash, getNode, join, list, makeFolder, move, rename, trash, useFsVersion } from '../fs';
-import { setState } from '../store';
+import { getState, setState } from '../store';
 import { openApp, openFile, play, setData, setTitle } from '../wm';
 
 const SIDEBAR = [
@@ -113,7 +113,9 @@ export function Finder({ win }: AppProps) {
   };
 
   const items = isApps
-    ? Object.values(APPS).map((a) => ({ key: a.id, name: a.name, app: a.id as AppId }))
+    ? Object.values(APPS)
+        .filter((a) => !a.adminOnly || getState().admin)
+        .map((a) => ({ key: a.id, name: a.name, app: a.id as AppId }))
     : list(path).map((n) => ({ key: join(path, n.name), name: n.name, node: n }));
 
   return (
