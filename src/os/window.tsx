@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { APPS } from './apps';
 import { useOS, WinState } from './store';
-import { close, focus, isCompact, minimize, moveWindow, resizeWindow, toggleMaximize } from './wm';
+import { close, exposeLayout, focus, isCompact, minimize, moveWindow, resizeWindow, toggleExpose, toggleMaximize } from './wm';
 
 type Edge = 'r' | 'b' | 'rb' | 'l' | 'lb';
 
@@ -18,6 +18,8 @@ function dockTarget(app: string, el: HTMLElement | null) {
 export function Window({ win }: { win: WinState }) {
   const meta = APPS[win.app];
   const focused = useOS((s) => s.focused === win.id);
+  const expose = useOS((s) => s.expose);
+  const layout = expose ? exposeLayout()[win.id] : null;
   const ref = useRef<HTMLDivElement>(null);
   const [anim, setAnim] = useState<'opening' | 'minimizing' | 'restoring' | null>('opening');
   const wasMin = useRef(win.minimized);
@@ -108,9 +110,17 @@ export function Window({ win }: { win: WinState }) {
       data-anim={anim ?? undefined}
       data-max={win.maximized}
       data-min={win.minimized}
+      data-expose={!!layout}
       role="dialog"
       aria-label={win.title}
-      style={{ left: win.x, top: win.y, width: win.w, height: win.h, zIndex: win.z }}
+      style={{
+        left: win.x,
+        top: win.y,
+        width: win.w,
+        height: win.h,
+        zIndex: win.z,
+        transform: layout ? `translate(${layout.tx}px, ${layout.ty}px) scale(${layout.scale})` : undefined,
+      }}
       onPointerDownCapture={() => focus(win.id)}
       onAnimationEnd={(e) => {
         if (e.target === e.currentTarget) setAnim(null);
@@ -139,6 +149,19 @@ export function Window({ win }: { win: WinState }) {
       <div className="win__content">
         <meta.Component win={win} />
       </div>
+      {layout && (
+        <button
+          type="button"
+          className="win__expose"
+          aria-label={`Show ${win.title}`}
+          onClick={() => {
+            focus(win.id);
+            toggleExpose(false);
+          }}
+        >
+          <span className="win__expose-label">{win.title}</span>
+        </button>
+      )}
       {resizable && !win.maximized && (
         <>
           <span className="win__edge win__edge--r" onPointerDown={startResize('r')} />

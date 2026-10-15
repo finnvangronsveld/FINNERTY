@@ -30,6 +30,8 @@ export type Settings = {
   dockSize: number;
   uiSounds: boolean;
   volume: number;
+  /** Minutes of inactivity before the screensaver starts; 0 turns it off. */
+  screensaver: number;
 };
 
 export type Note = { id: string; title: string; body: string; app?: AppId };
@@ -60,6 +62,10 @@ export type OSState = {
   loginAvailable: boolean;
   admin: boolean;
   nowPlaying: string | null;
+  expose: boolean;
+  dashboard: boolean;
+  switcher: { apps: AppId[]; index: number } | null;
+  screensaver: boolean;
 };
 
 const SETTINGS_KEY = 'finnos:settings';
@@ -70,6 +76,7 @@ const defaults: Settings = {
   dockSize: 54,
   uiSounds: true,
   volume: 0.85,
+  screensaver: 3,
 };
 
 function loadSettings(): Settings {
@@ -97,6 +104,10 @@ let state: OSState = {
   loginAvailable: false,
   admin: false,
   nowPlaying: null,
+  expose: false,
+  dashboard: false,
+  switcher: null,
+  screensaver: false,
 };
 
 const listeners = new Set<() => void>();

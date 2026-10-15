@@ -157,6 +157,40 @@ export function setData(id: string, data: Record<string, string>) {
   setState((s) => ({ windows: s.windows.map((w) => (w.id === id ? { ...w, data: { ...w.data, ...data } } : w)) }));
 }
 
+/** Exposé: where each visible window goes in a tidy grid (as a CSS transform). */
+export function exposeLayout() {
+  const b = desktopBounds();
+  const wins = getState().windows.filter((w) => !w.minimized).sort((a, c) => a.id.localeCompare(c.id));
+  const n = wins.length;
+  const cols = Math.ceil(Math.sqrt(n * (b.w / b.h) * 0.75)) || 1;
+  const rows = Math.ceil(n / cols) || 1;
+  const cw = b.w / cols;
+  const ch = b.h / rows;
+  const out: Record<string, { tx: number; ty: number; scale: number }> = {};
+  wins.forEach((w, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const scale = Math.min(1, (cw - 50) / w.w, (ch - 70) / w.h);
+    const cx = col * cw + cw / 2;
+    const cy = row * ch + ch / 2 - 10;
+    out[w.id] = { tx: cx - (w.x + w.w / 2), ty: cy - (w.y + w.h / 2), scale };
+  });
+  return out;
+}
+
+export function toggleExpose(on?: boolean) {
+  const next = on ?? !getState().expose;
+  if (next && !getState().windows.some((w) => !w.minimized)) return;
+  setState({ expose: next, dashboard: false });
+  play(next ? 'screen-on' : 'screen-off', { gain: 0.5 });
+}
+
+export function toggleDashboard(on?: boolean) {
+  const next = on ?? !getState().dashboard;
+  setState({ dashboard: next, expose: false });
+  play(next ? 'open' : 'close');
+}
+
 export function closeAll() {
   setState({ windows: [], focused: null });
 }

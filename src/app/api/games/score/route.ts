@@ -74,6 +74,9 @@ export async function POST(request: Request) {
   if (run.game === 'blocks' && score >= 10_000) codes.push('blocks-10k');
   if (run.game === 'bricks' && score >= 1000) codes.push('bricks-1k');
   if (run.game === 'minesweeper' && score <= 60) codes.push('mines-60');
+  if (run.game === 'flappy' && score >= 25) codes.push('flappy-25');
+  if (run.game === 'pong' && score >= 10) codes.push('pong-10');
+  if (run.game === 'solitaire') codes.push('solitaire-win');
   const [{ n }] = (await sql`SELECT count(*)::int AS n FROM finnos_scores WHERE twitch_id = ${player.id}`) as { n: number }[];
   if (n >= Object.keys(GAMES).length) codes.push('all-games');
   const achievements = await award(player.id, codes);

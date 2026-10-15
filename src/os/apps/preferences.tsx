@@ -75,6 +75,20 @@ export function Preferences({ win }: AppProps) {
                 </button>
               ))}
             </div>
+            <label className="prefs__row prefs__row--top">
+              <span>Screensaver</span>
+              <select
+                className="aqua-select"
+                value={settings.screensaver}
+                onChange={(e) => updateSettings({ screensaver: Number(e.target.value) })}
+              >
+                <option value={0}>Never</option>
+                <option value={1}>After 1 minute</option>
+                <option value={3}>After 3 minutes</option>
+                <option value={5}>After 5 minutes</option>
+                <option value={10}>After 10 minutes</option>
+              </select>
+            </label>
           </>
         )}
         {pane === 'dock' && (

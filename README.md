@@ -13,8 +13,13 @@ Finnerty's site is a full-screen desktop operating system in the browser, in glo
   shut down and log out.
 - Apps: Finder, Navigator (web browser), Twitch (stream plus chat), TextEdit, Terminal,
   Calculator, Sketch, Calendar, Preview, System Preferences, About.
-- Games with leaderboards: Snake, Blocks, 2048, Bricks and Minesweeper, plus Game Center.
+- Games with leaderboards: Snake, Blocks, 2048, Bricks, Minesweeper, Flappy Orb, Pong and Solitaire,
+  plus Chess against the computer. Game Center has leaderboards, a weekly tournament and achievements.
   Log in with Twitch (menu bar or Game Center) to save scores.
+- Stream and community: Theater (clips and past broadcasts), Emotes, Guestbook, Lobby chat.
+  Finn gets an Admin app (announcements, now playing, bans, score removal).
+- Photo Booth (webcam, stays in the browser), Expose (F3), Dashboard widgets (F4), app switcher (Alt + `),
+  and a screensaver after a few idle minutes.
 - Navigator fetches pages through `/api/reader` and shows a clean, script-free version.
 
 Keyboard: Alt + W closes a window, Alt + M minimizes, Alt + Q quits the app, Alt + N opens a new window.

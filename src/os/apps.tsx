@@ -1,6 +1,11 @@
 'use client';
 import type { ComponentType } from 'react';
 import {
+  Bird,
+  Camera,
+  CrownSimple,
+  PingPong,
+  Spade,
   BookOpenText,
   ChatsCircle,
   FilmStrip,
@@ -41,6 +46,11 @@ import { GameCenter } from './apps/gamecenter';
 import { Guestbook } from './apps/guestbook';
 import { Lobby } from './apps/lobby';
 import { Theater } from './apps/theater';
+import { PhotoBooth } from './apps/photobooth';
+import { ChessGame } from './games/chess';
+import { Flappy } from './games/flappy';
+import { Pong } from './games/pong';
+import { Solitaire } from './games/solitaire';
 import { Blocks } from './games/blocks';
 import { Bricks } from './games/bricks';
 import { Game2048 } from './games/g2048';
@@ -62,6 +72,11 @@ export type AppId =
   | 'guestbook'
   | 'lobby'
   | 'admin'
+  | 'flappy'
+  | 'pong'
+  | 'solitaire'
+  | 'chess'
+  | 'photobooth'
   | 'snake'
   | '2048'
   | 'bricks'
@@ -105,6 +120,11 @@ export const APPS: Record<AppId, AppMeta> = {
   guestbook: { id: 'guestbook', name: 'Guestbook', Icon: BookOpenText, from: '#e8c2a0', to: '#8a4f24', size: [520, 600], minSize: [360, 380], singleton: true, Component: Guestbook, blurb: 'Sign it, leave a message' },
   lobby: { id: 'lobby', name: 'Lobby', Icon: ChatsCircle, from: '#a6f0b0', to: '#1f9a4a', size: [420, 560], minSize: [300, 340], singleton: true, Component: Lobby, blurb: 'Chat with everyone on the site' },
   admin: { id: 'admin', name: 'Admin', Icon: ShieldStar, from: '#ffb3a8', to: '#b8160f', size: [600, 520], singleton: true, resizable: false, adminOnly: true, Component: Admin, blurb: 'Announcements and moderation' },
+  flappy: { id: 'flappy', name: 'Flappy Orb', Icon: Bird, from: '#d7c2ff', to: '#6a3ee0', size: [380, 600], minSize: [280, 420], singleton: true, Component: Flappy, blurb: 'Flap through the pipes' },
+  pong: { id: 'pong', name: 'Pong', Icon: PingPong, from: '#9fd0ff', to: '#1d4fa0', size: [600, 470], minSize: [400, 320], singleton: true, Component: Pong, blurb: 'Beat the computer' },
+  solitaire: { id: 'solitaire', name: 'Solitaire', Icon: Spade, from: '#b8e3a0', to: '#2f6a35', size: [700, 600], minSize: [560, 460], singleton: true, Component: Solitaire, blurb: 'Klondike, draw one' },
+  chess: { id: 'chess', name: 'Chess', Icon: CrownSimple, from: '#e8c2a0', to: '#6b4223', size: [520, 600], minSize: [380, 460], singleton: true, Component: ChessGame, blurb: 'Play against the computer' },
+  photobooth: { id: 'photobooth', name: 'Photo Booth', Icon: Camera, from: '#ff9a9a', to: '#b8160f', size: [720, 600], minSize: [460, 420], singleton: true, Component: PhotoBooth, blurb: 'Silly webcam photos' },
   gamecenter: { id: 'gamecenter', name: 'Game Center', Icon: GameController, from: '#c8f0a0', to: '#2f8a2a', size: [760, 560], minSize: [420, 380], singleton: true, Component: GameCenter, blurb: 'Leaderboards and your Twitch login' },
   snake: { id: 'snake', name: 'Snake', Icon: Waves, from: '#9fe0a0', to: '#1f8a4a', size: [460, 520], minSize: [300, 340], singleton: true, Component: Snake, blurb: 'Eat apples, don’t bite yourself' },
   '2048': { id: '2048', name: '2048', Icon: GridFour, from: '#ffe0a0', to: '#d6890c', size: [420, 520], minSize: [300, 380], singleton: true, Component: Game2048, blurb: 'Slide and merge the tiles' },

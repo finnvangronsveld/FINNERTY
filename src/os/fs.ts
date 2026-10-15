@@ -16,7 +16,7 @@ export type FsNode = {
   modified: number;
 };
 
-const KEY = 'finnos:fs:v5';
+const KEY = 'finnos:fs:v6';
 
 const WELCOME = `Welcome to FinnOS.
 
@@ -31,6 +31,7 @@ Things to try:
 - Browse the web in Navigator: it shows a clean, readable version of any page.
 - Watch clips and past streams in Theater, hang out in the Lobby, and sign the Guestbook.
 - Collect achievements and win the game of the week in Game Center.
+- Press F3 for Expose, F4 for the Dashboard, and Alt + \` to switch apps.
 - Draw something in Sketch and save it to Pictures.
 - Change the wallpaper in System Preferences.
 
@@ -56,6 +57,7 @@ function seed(): FsNode {
           { name: 'YouTube', kind: 'link', content: 'https://www.youtube.com/@xfinnerty', modified: t },
           { name: 'Guestbook', kind: 'app', content: 'guestbook', modified: t },
           { name: 'Emotes', kind: 'app', content: 'emotes', modified: t },
+          { name: 'Photo Booth', kind: 'app', content: 'photobooth', modified: t },
           {
             name: 'Games',
             kind: 'folder',
@@ -67,6 +69,10 @@ function seed(): FsNode {
               { name: '2048', kind: 'app', content: '2048', modified: t },
               { name: 'Bricks', kind: 'app', content: 'bricks', modified: t },
               { name: 'Minesweeper', kind: 'app', content: 'minesweeper', modified: t },
+              { name: 'Flappy Orb', kind: 'app', content: 'flappy', modified: t },
+              { name: 'Pong', kind: 'app', content: 'pong', modified: t },
+              { name: 'Solitaire', kind: 'app', content: 'solitaire', modified: t },
+              { name: 'Chess', kind: 'app', content: 'chess', modified: t },
             ],
           },
         ],

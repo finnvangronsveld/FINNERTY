@@ -17,6 +17,7 @@
     "@mozilla/readability": "^0.6.0",
     "@neondatabase/serverless": "^1.2.0",
     "@phosphor-icons/react": "^2.1.10",
+    "chess.js": "^1.4.0",
     "linkedom": "^0.18.13",
     "next": "16.3.5",
     "react": "^19.3.0",

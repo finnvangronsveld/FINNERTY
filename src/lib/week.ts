@@ -1,7 +1,8 @@
 import type { GameId } from './games';
 
 /** Games take turns as the game of the week, Monday to Sunday (UTC). */
-export const ROTATION: GameId[] = ['snake', 'blocks', '2048', 'bricks', 'minesweeper'];
+// Ordered so that week 42 of 2026 (when this list grew) stays on Snake.
+export const ROTATION: GameId[] = ['2048', 'bricks', 'minesweeper', 'flappy', 'snake', 'blocks', 'pong', 'solitaire'];
 
 export function isoWeek(d = new Date()) {
   const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));

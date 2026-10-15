@@ -6,12 +6,13 @@ import { claim } from './achieve';
 import { loadAccount, takeResume } from './account';
 import { APPS } from './apps';
 import { Desktop } from './desktop';
+import { Dashboard, ExposeBackdrop, Screensaver, Switcher } from './extras';
 import { Dock } from './dock';
 import { hydrateFs } from './fs';
 import { MenuBar } from './menubar';
 import { DialogLayer, Notifications, Spotlight } from './overlays';
 import { getState, hydrateSettings, notify, setState, useOS } from './store';
-import { close, focusedApp, minimize, MENU_H, openApp, play, quitApp } from './wm';
+import { close, focus, focusedApp, minimize, MENU_H, openApp, play, quitApp, restore, toggleDashboard, toggleExpose } from './wm';
 import { Window } from './window';
 
 function Boot() {
@@ -203,7 +204,31 @@ function useShortcuts() {
         setState({ spotlight: !s.spotlight });
         return;
       }
-      if (e.key === 'Escape' && s.spotlight) setState({ spotlight: false });
+      if (e.key === 'Escape') {
+        if (s.spotlight) setState({ spotlight: false });
+        if (s.expose) toggleExpose(false);
+        if (s.dashboard) toggleDashboard(false);
+      }
+      if (e.key === 'F3' || (e.altKey && e.code === 'KeyE')) {
+        e.preventDefault();
+        toggleExpose();
+        return;
+      }
+      if (e.key === 'F4' || (e.altKey && e.code === 'KeyD')) {
+        e.preventDefault();
+        toggleDashboard();
+        return;
+      }
+      // Alt + ` cycles through open apps; letting go of Alt switches.
+      if (e.altKey && e.code === 'Backquote') {
+        e.preventDefault();
+        const order = [...s.windows].sort((a, b) => b.z - a.z).map((w) => w.app);
+        const apps = [...new Set(order)];
+        if (apps.length < 2) return;
+        setState({ switcher: s.switcher ? { ...s.switcher, index: s.switcher.index + 1 } : { apps, index: 1 } });
+        play('tick', { gain: 0.6 });
+        return;
+      }
       if (!e.altKey) return;
       const f = s.windows.find((w) => w.id === s.focused && !w.minimized);
       if (e.code === 'KeyW' && f) {
@@ -225,8 +250,43 @@ function useShortcuts() {
         openApp(a, a === 'finder' ? { path: '/Desktop' } : undefined);
       }
     };
+    const up = (e: KeyboardEvent) => {
+      const sw = getState().switcher;
+      if (!sw || e.key !== 'Alt') return;
+      setState({ switcher: null });
+      const app = sw.apps[sw.index % sw.apps.length];
+      const wins = getState().windows.filter((w) => w.app === app).sort((a, b) => b.z - a.z);
+      const visible = wins.find((w) => !w.minimized);
+      if (visible) focus(visible.id);
+      else if (wins[0]) restore(wins[0].id);
+    };
     window.addEventListener('keydown', key);
-    return () => window.removeEventListener('keydown', key);
+    window.addEventListener('keyup', up);
+    return () => {
+      window.removeEventListener('keydown', key);
+      window.removeEventListener('keyup', up);
+    };
+  }, []);
+}
+
+/** Starts the screensaver after the chosen idle time (not while a video app is on screen). */
+function useIdle() {
+  useEffect(() => {
+    let last = Date.now();
+    const poke = () => (last = Date.now());
+    const events = ['pointermove', 'pointerdown', 'keydown', 'wheel'] as const;
+    events.forEach((ev) => window.addEventListener(ev, poke, { passive: true }));
+    const id = setInterval(() => {
+      const s = getState();
+      const mins = s.settings.screensaver;
+      const watching = s.windows.some((w) => !w.minimized && (w.app === 'twitch' || w.app === 'theater'));
+      if (!mins || s.phase !== 'desktop' || s.screensaver || watching) return;
+      if (Date.now() - last > mins * 60_000) setState({ screensaver: true, expose: false, dashboard: false });
+    }, 10_000);
+    return () => {
+      events.forEach((ev) => window.removeEventListener(ev, poke));
+      clearInterval(id);
+    };
   }, []);
 }
 
@@ -263,6 +323,7 @@ export function Shell() {
     if (player && phase === 'desktop' && h >= 2 && h < 5) claim('night-owl');
   }, [player, phase]);
   useShortcuts();
+  useIdle();
 
   // Keep zoomed windows filling the screen when the browser window changes size.
   useEffect(() => {
@@ -292,6 +353,7 @@ export function Shell() {
           <MenuBar />
           <div className="os__stage">
             <Desktop />
+            <ExposeBackdrop />
             <div className="os__windows">
               {windows.map((w) => (
                 <Window key={w.id} win={w} />
@@ -299,6 +361,9 @@ export function Shell() {
             </div>
           </div>
           <Dock />
+          <Switcher />
+          <Dashboard />
+          <Screensaver />
           <Spotlight />
           <Notifications />
           <DialogLayer />

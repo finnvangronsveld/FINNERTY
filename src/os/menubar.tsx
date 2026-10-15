@@ -7,7 +7,7 @@ import { LINKS } from '@/lib/links';
 import { APPS } from './apps';
 import { makeFolder } from './fs';
 import { getState, setState, updateSettings, useOS } from './store';
-import { close, focus, focusedApp, minimize, openApp, openFile, play, quitApp, shutdown, toggleMaximize } from './wm';
+import { close, focus, focusedApp, minimize, openApp, openFile, play, quitApp, shutdown, toggleDashboard, toggleExpose, toggleMaximize } from './wm';
 
 type Item =
   | { sep: true }
@@ -121,6 +121,10 @@ function useMenus(): Menu[] {
             else void document.documentElement.requestFullscreen?.().catch(() => undefined);
           },
         },
+        { sep: true },
+        { label: 'Exposé', key: 'F3', action: () => toggleExpose(true) },
+        { label: 'Dashboard', key: 'F4', action: () => toggleDashboard(true) },
+        { label: 'Start Screensaver', action: () => setState({ screensaver: true }) },
         { sep: true },
         {
           label: 'Dock Magnification',

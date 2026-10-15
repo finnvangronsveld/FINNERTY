@@ -5,6 +5,9 @@ export const GAMES = {
   bricks: { name: 'Bricks', unit: 'points', lowerIsBetter: false },
   blocks: { name: 'Blocks', unit: 'points', lowerIsBetter: false },
   minesweeper: { name: 'Minesweeper', unit: 'seconds', lowerIsBetter: true },
+  flappy: { name: 'Flappy Orb', unit: 'pipes', lowerIsBetter: false },
+  pong: { name: 'Pong', unit: 'points', lowerIsBetter: false },
+  solitaire: { name: 'Solitaire', unit: 'seconds', lowerIsBetter: true },
 } as const;
 
 export type GameId = keyof typeof GAMES;
@@ -29,5 +32,11 @@ export function plausible(game: GameId, score: number, seconds: number) {
       return score <= Math.min(2_000_000, seconds * 600 + 500);
     case 'minesweeper':
       return score >= 2 && score <= 999 && seconds + 2 >= score;
+    case 'flappy':
+      return score <= Math.min(5000, seconds * 0.9 + 2);
+    case 'pong':
+      return score <= Math.min(500, seconds / 1.5 + 1);
+    case 'solitaire':
+      return score >= 30 && score <= 7200 && seconds + 2 >= score;
   }
 }
